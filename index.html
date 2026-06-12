@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Reservas - Triciclos Eléctricos La Habana</title>
+<style>
+body{font-family:Arial;background:#121212;color:#fff;margin:0}
+header,section{padding:20px}h1,h2{color:#f33}
+.card{background:#222;padding:20px;border-radius:10px;max-width:900px;margin:auto}
+input,textarea,select{width:100%;padding:10px;margin:6px 0}
+button{background:#c00;color:#fff;padding:12px;border:none}
+table{width:100%;border-collapse:collapse}td,th{border:1px solid #555;padding:8px}
+</style></head><body>
+<header><h1>🚲 Triciclos Eléctricos La Habana</h1></header>
+
+<section><div class='card'>
+<h2>📅 Reserva tu viaje</h2>
+<form onsubmit='guardar();return false;'>
+<input id='nombre' placeholder='Nombre' required>
+<input id='telefono' placeholder='Teléfono'>
+<input id='origen' placeholder='Origen'>
+<input id='destino' placeholder='Destino'>
+<label>Fecha</label><input id='fecha' type='date' required>
+<label>Hora</label><input id='hora' type='time' required>
+<textarea id='detalle' placeholder='Detalles'></textarea>
+<button>Guardar y enviar</button>
+</form></div></section>
+
+<section><div class='card'>
+<h2>📋 Panel de administración</h2>
+<p>Solicitudes registradas en este dispositivo.</p>
+<table id='tabla'>
+<thead><tr><th>Cliente</th><th>Fecha</th><th>Hora</th><th>Ruta</th><th>Acción</th></tr></thead>
+<tbody></tbody>
+</table>
+</div></section>
+
+<script>
+let datos=JSON.parse(localStorage.getItem('reservas')||'[]');
+function render(){
+let tb=document.querySelector('#tabla tbody');tb.innerHTML='';
+datos.forEach((x,i)=>{
+tb.innerHTML+=`<tr><td>${x.n}</td><td>${x.f}</td><td>${x.h}</td><td>${x.o} ➜ ${x.d}</td>
+<td><button onclick='borrar(${i})'>Eliminar</button></td></tr>`;
+});
+localStorage.setItem('reservas',JSON.stringify(datos));
+}
+function borrar(i){datos.splice(i,1);render();}
+function guardar(){
+let r={n:nombre.value,t:telefono.value,o:origen.value,d:destino.value,
+f:fecha.value,h:hora.value,m:detalle.value};
+datos.push(r);render();
+let txt=`Hola, deseo reservar un viaje.%0ANombre:${r.n}%0AFecha:${r.f}%0AHora:${r.h}%0AOrigen:${r.o}%0ADestino:${r.d}%0ADetalles:${r.m}`;
+window.open("https://wa.me/5354632153?text="+txt);
+document.forms[0].reset();
+}
+render();
+</script>
+</body></html>
