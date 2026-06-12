@@ -1,57 +1,265 @@
-<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>Reservas - Triciclos Eléctricos La Habana</title>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Triciclos L&L Pro</title>
+
+<meta name="description" content="Triciclos L&L - Servicio profesional de transporte rápido y seguro">
+
 <style>
-body{font-family:Arial;background:#121212;color:#fff;margin:0}
-header,section{padding:20px}h1,h2{color:#f33}
-.card{background:#222;padding:20px;border-radius:10px;max-width:900px;margin:auto}
-input,textarea,select{width:100%;padding:10px;margin:6px 0}
-button{background:#c00;color:#fff;padding:12px;border:none}
-table{width:100%;border-collapse:collapse}td,th{border:1px solid #555;padding:8px}
-</style></head><body>
-<header><h1>🚲 Triciclos Eléctricos La Habana</h1></header>
+:root{
+  --bg:#0a0f1c;
+  --card:#111827;
+  --text:#ffffff;
+  --accent:#22c55e;
+  --blue:#0ea5e9;
+}
 
-<section><div class='card'>
-<h2>📅 Reserva tu viaje</h2>
-<form onsubmit='guardar();return false;'>
-<input id='nombre' placeholder='Nombre' required>
-<input id='telefono' placeholder='Teléfono'>
-<input id='origen' placeholder='Origen'>
-<input id='destino' placeholder='Destino'>
-<label>Fecha</label><input id='fecha' type='date' required>
-<label>Hora</label><input id='hora' type='time' required>
-<textarea id='detalle' placeholder='Detalles'></textarea>
-<button>Guardar y enviar</button>
-</form></div></section>
+.light{
+  --bg:#f5f6f7;
+  --card:#ffffff;
+  --text:#111827;
+  --accent:#16a34a;
+  --blue:#0284c7;
+}
 
-<section><div class='card'>
-<h2>📋 Panel de administración</h2>
-<p>Solicitudes registradas en este dispositivo.</p>
-<table id='tabla'>
-<thead><tr><th>Cliente</th><th>Fecha</th><th>Hora</th><th>Ruta</th><th>Acción</th></tr></thead>
-<tbody></tbody>
-</table>
-</div></section>
+body{
+  margin:0;
+  font-family:Arial;
+  background:var(--bg);
+  color:var(--text);
+  transition:0.3s;
+}
+
+header{
+  padding:40px 20px;
+  text-align:center;
+  background:linear-gradient(135deg,var(--blue),var(--accent));
+  color:white;
+}
+
+header h1{margin:0;font-size:2.2rem;}
+header p{opacity:0.9}
+
+.container{max-width:1000px;margin:auto;padding:20px;}
+
+.card{
+  background:var(--card);
+  padding:20px;
+  border-radius:15px;
+  margin-bottom:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.25);
+}
+
+input,textarea,select{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:10px;
+  border:none;
+  outline:none;
+}
+
+button{
+  border:none;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.primary{background:var(--accent);color:white;}
+.danger{background:#ef4444;color:white;}
+.blue{background:var(--blue);color:white;}
+
+.topbar{
+  position:fixed;
+  top:10px;
+  right:10px;
+  display:flex;
+  gap:5px;
+}
+
+.panel{
+  display:none;
+}
+
+.item{
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.status{
+  font-size:12px;
+  padding:3px 8px;
+  border-radius:20px;
+  display:inline-block;
+}
+
+.pending{background:#f59e0b;color:black;}
+.done{background:#22c55e;}
+.progress{background:#0ea5e9;}
+
+.floating{
+  position:fixed;
+  right:15px;
+  bottom:15px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.float{
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:20px;
+}
+
+.call{background:#16a34a;}
+.wa{background:#25D366;}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+<button onclick="toggle()">🌙</button>
+<button onclick="login()">Admin</button>
+</div>
+
+<header>
+<h1>Triciclos L&L</h1>
+<p>Rapidez · Seguridad · Confort · Profesionalidad</p>
+</header>
+
+<div class="container">
+
+<!-- RESERVA -->
+<div class="card">
+<h2>Crear reserva</h2>
+
+<input id="name" placeholder="Nombre">
+<input id="phone" placeholder="Teléfono">
+<input id="date" type="date">
+<input id="time" type="time">
+<textarea id="details" placeholder="Destino"></textarea>
+
+<button class="primary" onclick="add()">Guardar reserva</button>
+</div>
+
+<!-- ADMIN -->
+<div class="card panel" id="admin">
+<h2>Panel de control</h2>
+<div id="list"></div>
+</div>
+
+</div>
+
+<!-- BOTONES FLOTANTES -->
+<div class="floating">
+<div class="float call" onclick="window.location.href='tel:+5354632153'">📞</div>
+<div class="float wa" onclick="window.open('https://wa.me/5354632153')">💬</div>
+</div>
 
 <script>
-let datos=JSON.parse(localStorage.getItem('reservas')||'[]');
+
+let logged=false;
+
+function toggle(){
+ document.body.classList.toggle("light");
+}
+
+// guardar
+function add(){
+
+ let r={
+  name:name.value,
+  phone:phone.value,
+  date:date.value,
+  time:time.value,
+  details:details.value,
+  status:"pending",
+  id:Date.now()
+ };
+
+ let data=JSON.parse(localStorage.getItem("db")||"[]");
+ data.push(r);
+ localStorage.setItem("db",JSON.stringify(data));
+
+ let msg=`Reserva L&L:%0A${r.name}%0A${r.phone}%0A${r.date} ${r.time}%0A${r.details}`;
+ window.open(`https://wa.me/5354632153?text=${msg}`);
+
+ alert("Reserva enviada");
+
+ render();
+}
+
+// login admin
+function login(){
+ let p=prompt("Contraseña:");
+ if(p==="admin123"){
+  logged=true;
+  admin.style.display="block";
+  render();
+ }else{
+  alert("Incorrecto");
+ }
+}
+
+// cambiar estado
+function change(id,status){
+ let data=JSON.parse(localStorage.getItem("db")||"[]");
+ data=data.map(x=>x.id===id?{...x,status}:x);
+ localStorage.setItem("db",JSON.stringify(data));
+ render();
+}
+
+// eliminar
+function del(id){
+ let data=JSON.parse(localStorage.getItem("db")||"[]");
+ data=data.filter(x=>x.id!==id);
+ localStorage.setItem("db",JSON.stringify(data));
+ render();
+}
+
+// render
 function render(){
-let tb=document.querySelector('#tabla tbody');tb.innerHTML='';
-datos.forEach((x,i)=>{
-tb.innerHTML+=`<tr><td>${x.n}</td><td>${x.f}</td><td>${x.h}</td><td>${x.o} ➜ ${x.d}</td>
-<td><button onclick='borrar(${i})'>Eliminar</button></td></tr>`;
-});
-localStorage.setItem('reservas',JSON.stringify(datos));
+ let data=JSON.parse(localStorage.getItem("db")||"[]");
+
+ list.innerHTML=data.map(r=>`
+ <div class="item">
+ <b>${r.name}</b> - ${r.phone}<br>
+ ${r.date} ${r.time}<br>
+ <small>${r.details}</small><br>
+
+ <span class="status ${r.status}">
+ ${r.status}
+ </span>
+
+ <br><br>
+
+ <button class="blue" onclick="change(${r.id},'progress')">En curso</button>
+ <button class="primary" onclick="change(${r.id},'done')">Completado</button>
+ <button class="danger" onclick="del(${r.id})">Eliminar</button>
+ </div>
+ `).join("") || "Sin reservas";
 }
-function borrar(i){datos.splice(i,1);render();}
-function guardar(){
-let r={n:nombre.value,t:telefono.value,o:origen.value,d:destino.value,
-f:fecha.value,h:hora.value,m:detalle.value};
-datos.push(r);render();
-let txt=`Hola, deseo reservar un viaje.%0ANombre:${r.n}%0AFecha:${r.f}%0AHora:${r.h}%0AOrigen:${r.o}%0ADestino:${r.d}%0ADetalles:${r.m}`;
-window.open("https://wa.me/5354632153?text="+txt);
-document.forms[0].reset();
+
+// PWA básica
+if("serviceWorker" in navigator){
+ const sw=`self.addEventListener('install',e=>self.skipWaiting());`;
+ const blob=new Blob([sw],{type:"text/javascript"});
+ navigator.serviceWorker.register(URL.createObjectURL(blob));
 }
-render();
+
 </script>
-</body></html>
+
+</body>
+</html>
