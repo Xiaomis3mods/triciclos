@@ -1,97 +1,74 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#d10000">
-<title>Triciclos L&L - Pro</title>
-
-<link rel="manifest" href="data:application/manifest+json,{
-\"name\":\"Triciclos L&L\",
-\"short_name\":\"Triciclos L&L\",
-\"start_url\":\".\",
-\"display\":\"standalone\",
-\"background_color\":\"#ffffff\",
-\"theme_color\":\"#d10000\"}">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Triciclos L&L - Reservas</title>
 
 <style>
 body{
-margin:0;
-font-family:Arial;
-background:#f4f4f4;
-color:#111;
+    font-family: Arial;
+    margin:0;
+    background:#f5f5f5;
+    color:#111;
 }
 
 header{
-background:linear-gradient(135deg,#d10000,#000);
-color:#fff;
-text-align:center;
-padding:25px;
+    background:#c00;
+    color:#fff;
+    padding:20px;
+    text-align:center;
 }
 
-header h1{margin:0}
-header p{margin:5px 0}
-
-.container{
-max-width:1000px;
-margin:auto;
-padding:15px;
-}
+h1{margin:0}
 
 .card{
-background:#fff;
-padding:15px;
-margin:15px 0;
-border-radius:12px;
-box-shadow:0 2px 10px rgba(0,0,0,0.1);
-border-left:4px solid #d10000;
+    background:#fff;
+    max-width:900px;
+    margin:20px auto;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
 }
 
 input,textarea{
-width:100%;
-padding:10px;
-margin:6px 0;
-border-radius:8px;
-border:1px solid #ccc;
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+    color:#000;
+    background:#fff;
 }
 
+label{font-weight:bold}
+
 button{
-width:100%;
-padding:12px;
-background:#d10000;
-color:#fff;
-border:none;
-border-radius:8px;
-font-weight:bold;
-cursor:pointer;
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:8px;
+    background:#c00;
+    color:#fff;
+    font-size:16px;
+    cursor:pointer;
 }
 
 button:hover{
-background:#b30000;
+    background:#900;
 }
 
-.fab{
-position:fixed;
-right:20px;
-bottom:20px;
-background:#25d366;
-color:#fff;
-padding:15px 18px;
-border-radius:50px;
-text-decoration:none;
-font-weight:bold;
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
 }
 
-.admin-item{
-border:1px solid #ddd;
-padding:10px;
-border-radius:10px;
-margin:10px 0;
-}
-
-.ok{
-color:green;
-font-weight:bold;
+td,th{
+    border:1px solid #ddd;
+    padding:8px;
+    text-align:center;
 }
 </style>
 </head>
@@ -99,163 +76,108 @@ font-weight:bold;
 <body>
 
 <header>
-<h1>🚖 Triciclos L&L</h1>
-<p>Tu destino, nuestro compromiso</p>
-<p>Rapidez • Seguridad • Confort • Profesionalidad</p>
+<h1>🚲 Triciclos L&L</h1>
+<p>Rapidez, seguridad, confort y profesionalidad</p>
 </header>
 
-<div class="container">
-
-<!-- CLIENTE -->
 <div class="card">
-<h2>Reservar viaje</h2>
+<h2>📅 Reserva tu viaje</h2>
 
-<input id="nombre" placeholder="Nombre">
-<input id="tel" placeholder="Teléfono">
-<input id="origen" placeholder="Origen">
-<input id="destino" placeholder="Destino">
-<input type="date" id="fecha">
-<input type="time" id="hora">
-<input id="pasajeros" placeholder="Pasajeros">
+<form onsubmit="guardar();return false;">
 
-<button onclick="reservar()">📲 Enviar a WhatsApp</button>
+<input id="nombre" placeholder="Nombre completo" required>
+<input id="telefono" placeholder="Teléfono">
+
+<input id="origen" placeholder="Lugar de origen" required>
+<input id="destino" placeholder="Destino" required>
+
+<label>Fecha</label>
+<input id="fecha" type="date" required>
+
+<label>Hora</label>
+<input id="hora" type="time" required>
+
+<textarea id="detalle" placeholder="Detalles adicionales"></textarea>
+
+<button type="submit">📲 Reservar y enviar a WhatsApp</button>
+</form>
 </div>
 
-<!-- ADMIN -->
 <div class="card">
-<h2>Panel de administración</h2>
-<div id="admin"></div>
+<h2>📋 Reservas guardadas</h2>
+<table>
+<thead>
+<tr>
+<th>Cliente</th>
+<th>Fecha</th>
+<th>Hora</th>
+<th>Ruta</th>
+<th>Acción</th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
 </div>
-
-</div>
-
-<a class="fab" href="tel:+5354632153">📞 Llamar</a>
 
 <script>
+let datos = JSON.parse(localStorage.getItem("reservas") || "[]");
 
-/* =========================
-   GPS
-========================= */
-function getLocation(callback){
-if(!navigator.geolocation){
-callback("No disponible");
-return;
-}
+function render(){
+let tb = document.getElementById("tabla");
+tb.innerHTML = "";
 
-navigator.geolocation.getCurrentPosition(pos=>{
-let lat = pos.coords.latitude;
-let lon = pos.coords.longitude;
-callback(`https://maps.google.com/?q=${lat},${lon}`);
+datos.forEach((x,i)=>{
+tb.innerHTML += `
+<tr>
+<td>${x.n}</td>
+<td>${x.f}</td>
+<td>${x.h}</td>
+<td>${x.o} ➜ ${x.d}</td>
+<td><button onclick="borrar(${i})">Eliminar</button></td>
+</tr>`;
 });
+
+localStorage.setItem("reservas", JSON.stringify(datos));
 }
 
-/* =========================
-   RESERVA WHATSAPP PRO
-========================= */
-function reservar(){
-
-let nombre = document.getElementById("nombre").value;
-let tel = document.getElementById("tel").value;
-let origen = document.getElementById("origen").value;
-let destino = document.getElementById("destino").value;
-let fecha = document.getElementById("fecha").value;
-let hora = document.getElementById("hora").value;
-let pasajeros = document.getElementById("pasajeros").value;
-
-if(!nombre || !tel || !origen || !destino){
-alert("Completa los campos");
-return;
+function borrar(i){
+datos.splice(i,1);
+render();
 }
 
-/* sonido */
-let audio = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-audio.play();
+function guardar(){
 
-/* GPS + envío */
-getLocation(function(ubicacion){
-
-let reservas = JSON.parse(localStorage.getItem("reservas") || "[]");
-
-let data = {
-nombre,tel,origen,destino,fecha,hora,pasajeros,
-ubicacion:ubicacion
+let r = {
+n:nombre.value,
+t:telefono.value,
+o:origen.value,
+d:destino.value,
+f:fecha.value,
+h:hora.value,
+m:detalle.value
 };
 
-reservas.push(data);
-localStorage.setItem("reservas", JSON.stringify(reservas));
-
-let msg =
-`🚖 *TRICICLOS L&L - NUEVA RESERVA*%0A%0A`+
-`👤 ${nombre}%0A`+
-`📞 ${tel}%0A`+
-`📍 ${origen} → ${destino}%0A`+
-`📅 ${fecha} ⏰ ${hora}%0A`+
-`👥 ${pasajeros}%0A`+
-`🌍 Ubicación: ${ubicacion}`;
-
-window.open("https://wa.me/5354632153?text="+encodeURIComponent(msg));
-
-notify();
+datos.push(r);
 render();
-});
-}
 
-/* =========================
-   NOTIFICACIÓN
-========================= */
-function notify(){
-if(Notification.permission === "granted"){
-new Notification("Triciclos L&L",{
-body:"Reserva enviada correctamente 🚖"
-});
-}else{
-Notification.requestPermission();
-}
-}
+let txt =
+`Hola, quiero reservar un triciclo:
+Nombre: ${r.n}
+Teléfono: ${r.t}
+Origen: ${r.o}
+Destino: ${r.d}
+Fecha: ${r.f}
+Hora: ${r.h}
+Detalles: ${r.m}`;
 
-/* =========================
-   ADMIN PANEL
-========================= */
-function render(){
+let url = "https://wa.me/5354632153?text=" + encodeURIComponent(txt);
 
-let data = JSON.parse(localStorage.getItem("reservas") || "[]");
+window.open(url, "_blank");
 
-let html = "";
-
-data.forEach((r,i)=>{
-html += `
-<div class="admin-item">
-<b>${r.nombre}</b> ${r.tel}<br>
-${r.origen} → ${r.destino}<br>
-📅 ${r.fecha} ⏰ ${r.hora}<br>
-🌍 ${r.ubicacion || "sin GPS"}<br>
-<button onclick="eliminar(${i})">Eliminar</button>
-</div>
-`;
-});
-
-document.getElementById("admin").innerHTML = html;
-}
-
-function eliminar(i){
-let data = JSON.parse(localStorage.getItem("reservas") || "[]");
-data.splice(i,1);
-localStorage.setItem("reservas", JSON.stringify(data));
-render();
+document.querySelector("form").reset();
 }
 
 render();
-
-/* =========================
-   SERVICE WORKER SIMPLE
-========================= */
-if('serviceWorker' in navigator){
-const sw = `
-self.addEventListener('fetch', e=>{});
-`;
-navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw])));
-}
-
 </script>
 
 </body>
