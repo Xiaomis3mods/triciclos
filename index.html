@@ -13,7 +13,7 @@ body{
     color:#111;
 }
 
-/* ================= HEADER ================= */
+/* HEADER */
 header{
     position:relative;
     height:280px;
@@ -24,7 +24,6 @@ header{
     overflow:hidden;
 }
 
-/* imagen */
 header::before{
     content:"";
     position:absolute;
@@ -36,7 +35,6 @@ header::before{
     z-index:0;
 }
 
-/* contenido */
 .header-content{
     position:relative;
     z-index:1;
@@ -44,17 +42,14 @@ header::before{
     padding-bottom:25px;
 }
 
-/* título */
 header h1{
     margin:0;
     font-size:42px;
     font-weight:900;
     color:#fff;
     text-shadow:3px 3px 12px rgba(0,0,0,0.95);
-    letter-spacing:1px;
 }
 
-/* eslogan */
 header p{
     margin-top:10px;
     font-size:20px;
@@ -63,7 +58,7 @@ header p{
     text-shadow:3px 3px 10px rgba(0,0,0,0.95);
 }
 
-/* ================= CARD ================= */
+/* CARD */
 .card{
     background:white;
     max-width:900px;
@@ -73,11 +68,6 @@ header p{
     box-shadow:0 6px 18px rgba(0,0,0,0.12);
 }
 
-h2{
-    margin-top:0;
-}
-
-/* inputs */
 input,textarea{
     width:100%;
     padding:12px;
@@ -87,7 +77,6 @@ input,textarea{
     font-size:15px;
 }
 
-/* botones */
 button{
     width:100%;
     padding:14px;
@@ -103,7 +92,6 @@ button:hover{
     background:#900;
 }
 
-/* tabla */
 table{
     width:100%;
     border-collapse:collapse;
@@ -126,7 +114,7 @@ th,td{
     </div>
 </header>
 
-<!-- FORMULARIO -->
+<!-- FORM -->
 <div class="card">
 <h2>📅 Reservar viaje</h2>
 
@@ -148,7 +136,7 @@ th,td{
 </form>
 </div>
 
-<!-- ADMIN -->
+<!-- TABLA -->
 <div class="card">
 <h2>📋 Reservas guardadas</h2>
 
@@ -195,30 +183,36 @@ render();
 function guardar(){
 
 let r = {
-n:nombre.value,
-t:telefono.value,
-o:origen.value,
-d:destino.value,
-f:fecha.value,
-h:hora.value,
-m:detalle.value
+n: nombre.value,
+t: telefono.value,
+o: origen.value,
+d: destino.value,
+f: fecha.value,
+h: hora.value,
+m: detalle.value
 };
 
 datos.push(r);
 render();
 
+// MENSAJE CORREGIDO
 let msg =
-`🛺 Triciclos L&L%0A
-Nombre: ${r.n}%0A
-Teléfono: ${r.t}%0A
-Origen: ${r.o}%0A
-Destino: ${r.d}%0A
-Fecha: ${r.f}%0A
-Hora: ${r.h}%0A
+`🛺 Triciclos L&L
+Nombre: ${r.n}
+Teléfono: ${r.t}
+Origen: ${r.o}
+Destino: ${r.d}
+Fecha: ${r.f}
+Hora: ${r.h}
 Detalles: ${r.m}`;
 
-window.open("https://wa.me/5354632153?text=" + msg);
+// FIX DEFINITIVO WHATSAPP
+let url = "https://wa.me/5354632153?text=" + encodeURIComponent(msg);
 
+// abrir WhatsApp
+window.open(url, "_blank");
+
+// limpiar formulario
 document.querySelector("form").reset();
 }
 
