@@ -1,76 +1,123 @@
-<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width,initial-scale=1'>
-<title>Reservas - Triciclos Eléctricos La Habana</title>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Triciclos L&L - Reservas</title>
 
 <style>
-body{font-family:Arial;background:#121212;color:#fff;margin:0}
-header,section{padding:20px}
-h1,h2{color:#f33}
-
-.card{
-background:#222;
-padding:20px;
-border-radius:10px;
-max-width:900px;
-margin:auto
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f2f2f2; /* fondo claro */
+    color:#111;
 }
 
-input,textarea,select{
-width:100%;
-padding:10px;
-margin:6px 0
+header{
+    background:#c40000;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+
+header h1{
+    margin:0;
+    font-size:24px;
+}
+
+.slogan{
+    margin-top:5px;
+    font-size:14px;
+    opacity:0.9;
+}
+
+.card{
+    background:white;
+    max-width:900px;
+    margin:20px auto;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+input,textarea{
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:15px;
+}
+
+label{
+    font-weight:bold;
 }
 
 button{
-background:#c00;
-color:#fff;
-padding:12px;
-border:none;
-cursor:pointer
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:8px;
+    background:#c40000;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#900;
 }
 
 table{
-width:100%;
-border-collapse:collapse
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
 }
 
-td,th{
-border:1px solid #555;
-padding:8px
+th,td{
+    border:1px solid #ddd;
+    padding:8px;
+    text-align:center;
 }
 
-.eslogan{
-color:#fff;
-font-size:14px;
-opacity:0.9;
-margin-top:5px;
+h2{
+    margin-top:0;
 }
 </style>
+</head>
 
-</head><body>
+<body>
 
 <header>
-<h1>🚲 Triciclos Eléctricos La Habana</h1>
-<p class="eslogan">Tu destino, nuestro compromiso</p>
+    <h1>🚲 Triciclos L&L</h1>
+    <div class="slogan">Tu destino, nuestro compromiso</div>
 </header>
 
-<section><div class='card'>
-<h2>📅 Reserva tu viaje</h2>
-<form onsubmit='guardar();return false;'>
-<input id='nombre' placeholder='Nombre' required>
-<input id='telefono' placeholder='Teléfono'>
-<input id='origen' placeholder='Origen'>
-<input id='destino' placeholder='Destino'>
-<label>Fecha</label><input id='fecha' type='date' required>
-<label>Hora</label><input id='hora' type='time' required>
-<textarea id='detalle' placeholder='Detalles'></textarea>
-<button>Guardar y enviar</button>
-</form></div></section>
+<div class="card">
+<h2>📅 Reservar viaje</h2>
 
-<section><div class='card'>
-<h2>📋 Panel de administración</h2>
-<p>Solicitudes registradas en este dispositivo.</p>
-<table id='tabla'>
+<form onsubmit="guardar();return false;">
+<input id="nombre" placeholder="Nombre completo" required>
+<input id="telefono" placeholder="Teléfono">
+<input id="origen" placeholder="Lugar de origen" required>
+<input id="destino" placeholder="Destino" required>
+
+<label>Fecha</label>
+<input id="fecha" type="date" required>
+
+<label>Hora</label>
+<input id="hora" type="time" required>
+
+<textarea id="detalle" placeholder="Detalles adicionales"></textarea>
+
+<button type="submit">📲 Enviar reserva por WhatsApp</button>
+</form>
+</div>
+
+<div class="card">
+<h2>📋 Reservas guardadas</h2>
+
+<table>
 <thead>
 <tr>
 <th>Cliente</th>
@@ -80,29 +127,29 @@ margin-top:5px;
 <th>Acción</th>
 </tr>
 </thead>
-<tbody></tbody>
+<tbody id="tabla"></tbody>
 </table>
-</div></section>
+</div>
 
 <script>
-let datos=JSON.parse(localStorage.getItem('reservas')||'[]');
+let datos = JSON.parse(localStorage.getItem("reservas") || "[]");
 
 function render(){
-let tb=document.querySelector('#tabla tbody');
-tb.innerHTML='';
+let tb = document.getElementById("tabla");
+tb.innerHTML = "";
 
 datos.forEach((x,i)=>{
-tb.innerHTML+=`
+tb.innerHTML += `
 <tr>
 <td>${x.n}</td>
 <td>${x.f}</td>
 <td>${x.h}</td>
 <td>${x.o} ➜ ${x.d}</td>
-<td><button onclick='borrar(${i})'>Eliminar</button></td>
+<td><button onclick="borrar(${i})">Eliminar</button></td>
 </tr>`;
 });
 
-localStorage.setItem('reservas',JSON.stringify(datos));
+localStorage.setItem("reservas", JSON.stringify(datos));
 }
 
 function borrar(i){
@@ -112,7 +159,7 @@ render();
 
 function guardar(){
 
-let r={
+let r = {
 n:nombre.value,
 t:telefono.value,
 o:origen.value,
@@ -125,22 +172,25 @@ m:detalle.value
 datos.push(r);
 render();
 
-let txt=
-`Hola, deseo reservar un viaje.%0A
-Nombre: ${r.n}%0A
-Teléfono: ${r.t}%0A
-Fecha: ${r.f}%0A
-Hora: ${r.h}%0A
-Origen: ${r.o}%0A
-Destino: ${r.d}%0A
+let msg =
+`🚲 Reserva Triciclos L&L
+Nombre: ${r.n}
+Tel: ${r.t}
+Origen: ${r.o}
+Destino: ${r.d}
+Fecha: ${r.f}
+Hora: ${r.h}
 Detalles: ${r.m}`;
 
-window.open("https://wa.me/5354632153?text="+txt);
+let url = "https://wa.me/5354632153?text=" + encodeURIComponent(msg);
 
-document.forms[0].reset();
+window.open(url, "_blank");
+
+document.querySelector("form").reset();
 }
 
 render();
 </script>
 
-</body></html>
+</body>
+</html>
