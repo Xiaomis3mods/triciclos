@@ -3,61 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1e88e5">
-<meta name="description" content="Triciclos L&L - Transporte seguro en La Habana">
-
+<meta name="theme-color" content="#d10000">
 <title>Triciclos L&L</title>
 
-<!-- PWA MANIFEST REAL -->
 <link rel="manifest" href="data:application/manifest+json,{
 \"name\":\"Triciclos L&L\",
 \"short_name\":\"Triciclos L&L\",
-\"start_url\":\".\",
 \"display\":\"standalone\",
-\"background_color\":\"#ffffff\",
-\"theme_color\":\"#1e88e5\",
-\"icons\":[
-{\"src\":\"https://cdn-icons-png.flaticon.com/512/1995/1995485.png\",\"sizes\":\"192x192\",\"type\":\"image/png\"},
-{\"src\":\"https://cdn-icons-png.flaticon.com/512/1995/1995485.png\",\"sizes\":\"512x512\",\"type\":\"image/png\"}
-]}">
+\"background_color\":\"#000000\",
+\"theme_color\":\"#d10000\"}">
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:#f4f6f8;
+background:#000;
+color:#fff;
 }
 
 header{
-background:linear-gradient(135deg,#1e88e5,#42a5f5);
-color:white;
+background:linear-gradient(135deg,#d10000,#000);
 padding:30px;
 text-align:center;
+border-bottom:3px solid #d10000;
 }
 
-.container{padding:15px;max-width:1000px;margin:auto}
+header h1{margin:0;font-size:28px}
+header p{margin:5px 0;opacity:0.9}
+
+.container{max-width:1000px;margin:auto;padding:15px}
 
 .card{
-background:white;
+background:#111;
 padding:15px;
-border-radius:12px;
 margin:15px 0;
-box-shadow:0 3px 10px rgba(0,0,0,.1);
+border-radius:12px;
+border:1px solid #d10000;
 }
 
-input,textarea,button{
+input,textarea{
 width:100%;
 padding:10px;
 margin:6px 0;
 border-radius:8px;
-border:1px solid #ccc;
+border:1px solid #333;
+background:#000;
+color:#fff;
 }
 
 button{
-background:#1e88e5;
+width:100%;
+padding:12px;
+background:#d10000;
 color:white;
 border:none;
+border-radius:8px;
 cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+background:#ff0000;
 }
 
 .fab{
@@ -70,7 +76,6 @@ padding:15px 18px;
 border-radius:50px;
 text-decoration:none;
 font-weight:bold;
-box-shadow:0 5px 15px rgba(0,0,0,.2);
 }
 </style>
 </head>
@@ -79,7 +84,7 @@ box-shadow:0 5px 15px rgba(0,0,0,.2);
 
 <header>
 <h1>Triciclos L&L</h1>
-<p><b>Tu destino, nuestro compromiso.</b></p>
+<p>Tu destino, nuestro compromiso</p>
 <p>Rapidez • Seguridad • Confort • Profesionalidad</p>
 </header>
 
@@ -87,19 +92,21 @@ box-shadow:0 5px 15px rgba(0,0,0,.2);
 
 <div class="card">
 <h2>Reservar viaje</h2>
+
 <input id="nombre" placeholder="Nombre">
 <input id="tel" placeholder="Teléfono">
-<input id="origen" placeholder="Recogida">
+<input id="origen" placeholder="Origen">
 <input id="destino" placeholder="Destino">
-<input type="date" id="fecha">
-<input type="time" id="hora">
-<button onclick="guardar()">Guardar reserva</button>
+<input id="fecha" type="date">
+<input id="hora" type="time">
+<input id="pasajeros" placeholder="Pasajeros">
+
+<button onclick="enviarWhatsApp()">📲 Reservar por WhatsApp</button>
 </div>
 
 <div class="card">
-<h2>Reservas</h2>
+<h2>Reservas guardadas</h2>
 <div id="lista"></div>
-<button onclick="exportar()">Exportar CSV</button>
 </div>
 
 </div>
@@ -108,91 +115,31 @@ box-shadow:0 5px 15px rgba(0,0,0,.2);
 
 <script>
 
-/* =========================
-   SERVICE WORKER REAL PWA
-========================= */
+// GUARDAR Y ENVIAR A WHATSAPP
+function enviarWhatsApp(){
 
-const swCode = `
-const CACHE_NAME = "triciclos-ll-cache-v1";
-const urlsToCache = ["./"];
+let nombre = document.getElementById("nombre").value;
+let tel = document.getElementById("tel").value;
+let origen = document.getElementById("origen").value;
+let destino = document.getElementById("destino").value;
+let fecha = document.getElementById("fecha").value;
+let hora = document.getElementById("hora").value;
+let pasajeros = document.getElementById("pasajeros").value;
 
-self.addEventListener("install", e=>{
-self.skipWaiting();
-});
+let mensaje =
+`🚖 Nueva Reserva - Triciclos L&L%0A
+👤 Nombre: ${nombre}%0A
+📞 Tel: ${tel}%0A
+📍 Origen: ${origen}%0A
+🎯 Destino: ${destino}%0A
+📅 Fecha: ${fecha}%0A
+⏰ Hora: ${hora}%0A
+👥 Pasajeros: ${pasajeros}`;
 
-self.addEventListener("fetch", e=>{
-e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
-});
-`;
+let url = "https://wa.me/5354632153?text=" + mensaje;
 
-const swBlob = new Blob([swCode], {type:"text/javascript"});
-const swURL = URL.createObjectURL(swBlob);
-
-if('serviceWorker' in navigator){
-navigator.serviceWorker.register(swURL);
+window.open(url, "_blank");
 }
-
-/* =========================
-   RESERVAS LOCAL STORAGE
-========================= */
-
-function getData(){
-return JSON.parse(localStorage.getItem("reservas") || "[]");
-}
-
-function save(){
-let data = getData();
-
-data.push({
-nombre:nombre.value,
-tel:tel.value,
-origen:origen.value,
-destino:destino.value,
-fecha:fecha.value,
-hora:hora.value
-});
-
-localStorage.setItem("reservas", JSON.stringify(data));
-
-document.querySelectorAll("input").forEach(i=>i.value="");
-
-render();
-}
-
-function render(){
-let data = getData();
-let html = "";
-
-data.forEach((r,i)=>{
-html += `
-<div class="card">
-<b>${r.nombre}</b><br>
-${r.origen} ➜ ${r.destino}<br>
-📅 ${r.fecha} ⏰ ${r.hora}<br>
-📞 ${r.tel}
-</div>`;
-});
-
-document.getElementById("lista").innerHTML = html;
-}
-
-function exportar(){
-let data = getData();
-let csv = "Nombre,Telefono,Origen,Destino,Fecha,Hora\n";
-
-data.forEach(x=>{
-csv += `${x.nombre},${x.tel},${x.origen},${x.destino},${x.fecha},${x.hora}\n`;
-});
-
-let a = document.createElement("a");
-a.href = URL.createObjectURL(new Blob([csv]));
-a.download = "reservas.csv";
-a.click();
-}
-
-function guardar(){ save(); }
-
-render();
 
 </script>
 
