@@ -1,222 +1,161 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Triciclos L&L - Reservas</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Triciclos L&L - Pro</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
 body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:#f2f2f2;
-    color:#111;
+margin:0;
+font-family:Arial;
+background:#f5f5f5;
+color:#111;
 }
 
-/* HEADER */
 header{
-    position:relative;
-    height:280px;
-    display:flex;
-    justify-content:flex-end;
-    align-items:center;
-    text-align:center;
-    overflow:hidden;
+height:220px;
+background:
+linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),
+url("https://raw.githubusercontent.com/Xiaomis3mods/triciclos/4dc2c8ca77aca786c4f1b0399244c3b0a28c3ebe/1b03d7c1a-32e1-471b-bf64-2aab6aa8124d.png");
+background-size:cover;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+color:white;
+flex-direction:column;
 }
 
-header::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background-image:url("https://raw.githubusercontent.com/Xiaomis3mods/triciclos/4dc2c8ca77aca786c4f1b0399244c3b0a28c3ebe/1b03d7c1a-32e1-471b-bf64-2aab6aa8124d.png");
-    background-size:cover;
-    background-position:center;
-    filter:brightness(0.45);
-    z-index:0;
-}
+header h1{margin:0;font-size:36px;}
+header p{margin-top:8px;font-size:16px;}
 
-.header-content{
-    position:relative;
-    z-index:1;
-    width:100%;
-    padding-bottom:25px;
-}
+.container{max-width:900px;margin:auto;padding:15px;}
 
-header h1{
-    margin:0;
-    font-size:42px;
-    font-weight:900;
-    color:#fff;
-    text-shadow:3px 3px 12px rgba(0,0,0,0.95);
-}
-
-header p{
-    margin-top:10px;
-    font-size:20px;
-    font-weight:600;
-    color:#fff;
-    text-shadow:3px 3px 10px rgba(0,0,0,0.95);
-}
-
-/* CARD */
 .card{
-    background:white;
-    max-width:900px;
-    margin:20px auto;
-    padding:20px;
-    border-radius:14px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.12);
+background:white;
+padding:15px;
+margin-bottom:15px;
+border-radius:12px;
+box-shadow:0 3px 10px rgba(0,0,0,.1);
 }
 
-input,textarea{
-    width:100%;
-    padding:12px;
-    margin:6px 0;
-    border:1px solid #ccc;
-    border-radius:8px;
-    font-size:15px;
+input,textarea,select{
+width:100%;
+padding:10px;
+margin:5px 0;
+border-radius:8px;
+border:1px solid #ccc;
 }
 
 button{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:8px;
-    background:#c40000;
-    color:#fff;
-    font-size:16px;
-    cursor:pointer;
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+background:#c40000;
+color:white;
+font-size:15px;
+cursor:pointer;
 }
 
-button:hover{
-    background:#900;
-}
+button:hover{background:#900;}
 
-table{
-    width:100%;
-    border-collapse:collapse;
-}
-
-th,td{
-    border:1px solid #ddd;
-    padding:8px;
-    text-align:center;
-}
+#map{height:260px;border-radius:10px;margin-top:10px;}
 </style>
 </head>
 
 <body>
 
 <header>
-    <div class="header-content">
-        <h1>Triciclos L&L</h1>
-        <p>Tu destino, nuestro compromiso</p>
-    </div>
+<h1>Triciclos L&L</h1>
+<p>Tu destino, nuestro compromiso</p>
 </header>
 
-<!-- FORM -->
-<div class="card">
-<h2>📅 Reservar viaje</h2>
+<div class="container">
 
-<form onsubmit="guardar();return false;">
-<input id="nombre" placeholder="Nombre completo" required>
+<!-- MAPA SOLO UBICACIÓN -->
+<div class="card">
+<h2>🗺️ Ubicación actual</h2>
+<div id="map"></div>
+</div>
+
+<!-- FORMULARIO -->
+<div class="card">
+<h2>🛺 Reserva manual</h2>
+
+<input id="nombre" placeholder="Nombre">
 <input id="telefono" placeholder="Teléfono">
-<input id="origen" placeholder="Origen" required>
-<input id="destino" placeholder="Destino" required>
 
-<label>Fecha</label>
-<input id="fecha" type="date" required>
+<input id="origenTxt" placeholder="Origen (escribe manual)">
+<input id="destinoTxt" placeholder="Destino (escribe manual)">
 
-<label>Hora</label>
-<input id="hora" type="time" required>
+<!-- NUEVOS CAMPOS -->
+<select id="pasajeros">
+  <option value="1">1 pasajero</option>
+  <option value="2">2 pasajeros</option>
+  <option value="3">3 pasajeros</option>
+  <option value="4">4 pasajeros</option>
+  <option value="5">5 pasajeros</option>
+  <option value="6">6 pasajeros (máx)</option>
+</select>
 
-<textarea id="detalle" placeholder="Detalles adicionales"></textarea>
+<select id="pago">
+  <option value="Efectivo">Efectivo</option>
+  <option value="Transferencia">Transferencia</option>
+</select>
 
-<button type="submit">📲 Enviar por WhatsApp</button>
-</form>
+<textarea id="detalle" placeholder="Detalles del viaje"></textarea>
+
+<br>
+<button onclick="reservar()">📲 Solicitar viaje</button>
 </div>
 
-<!-- TABLA -->
-<div class="card">
-<h2>📋 Reservas guardadas</h2>
-
-<table>
-<thead>
-<tr>
-<th>Cliente</th>
-<th>Fecha</th>
-<th>Hora</th>
-<th>Ruta</th>
-<th>Acción</th>
-</tr>
-</thead>
-<tbody id="tabla"></tbody>
-</table>
 </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-let datos = JSON.parse(localStorage.getItem("reservas") || "[]");
 
-function render(){
-let tb = document.getElementById("tabla");
-tb.innerHTML = "";
+// MAPA SOLO UBICACIÓN
+let map = L.map('map').setView([45.5019,-73.5674],13);
 
-datos.forEach((x,i)=>{
-tb.innerHTML += `
-<tr>
-<td>${x.n}</td>
-<td>${x.f}</td>
-<td>${x.h}</td>
-<td>${x.o} ➜ ${x.d}</td>
-<td><button onclick="borrar(${i})">Eliminar</button></td>
-</tr>`;
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+navigator.geolocation.getCurrentPosition(pos=>{
+let user = [pos.coords.latitude,pos.coords.longitude];
+map.setView(user,15);
+
+L.marker(user).addTo(map)
+.bindPopup("Estás aquí")
+.openPopup();
 });
 
-localStorage.setItem("reservas", JSON.stringify(datos));
-}
+// RESERVA
+function reservar(){
 
-function borrar(i){
-datos.splice(i,1);
-render();
-}
+let n = document.getElementById("nombre").value;
+let t = document.getElementById("telefono").value;
+let o = document.getElementById("origenTxt").value;
+let d = document.getElementById("destinoTxt").value;
+let p = document.getElementById("pasajeros").value;
+let pay = document.getElementById("pago").value;
+let det = document.getElementById("detalle").value;
 
-function guardar(){
-
-let r = {
-n: nombre.value,
-t: telefono.value,
-o: origen.value,
-d: destino.value,
-f: fecha.value,
-h: hora.value,
-m: detalle.value
-};
-
-datos.push(r);
-render();
-
-// MENSAJE CORREGIDO
 let msg =
 `🛺 Triciclos L&L
-Nombre: ${r.n}
-Teléfono: ${r.t}
-Origen: ${r.o}
-Destino: ${r.d}
-Fecha: ${r.f}
-Hora: ${r.h}
-Detalles: ${r.m}`;
+👤 ${n}
+📞 ${t}
+📍 ${o} → ${d}
+👥 Pasajeros: ${p}
+💳 Pago: ${pay}
+📝 ${det}`;
 
-// FIX DEFINITIVO WHATSAPP
-let url = "https://wa.me/5354632153?text=" + encodeURIComponent(msg);
-
-// abrir WhatsApp
-window.open(url, "_blank");
-
-// limpiar formulario
-document.querySelector("form").reset();
+window.open("https://wa.me/5354632153?text="+encodeURIComponent(msg));
 }
 
-render();
 </script>
 
 </body>
