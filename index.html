@@ -34,34 +34,25 @@ box-shadow:0 6px 18px rgba(0,0,0,.06)
 
 h2{margin-bottom:10px}
 
-/* botones */
 .map-tab,button{
 width:100%;padding:14px;border:none;border-radius:14px;
-background:var(--r);color:#fff;font-weight:700;cursor:pointer
+background:var(--r);color:#fff;font-weight:700;cursor:pointer;
+margin-top:8px;
 }
 
-/* mapa y servicios ocultos */
 #mapContainer,#serviciosContainer{display:none}
 
 #map{height:55vh;min-height:320px;border-radius:16px}
 
-/* inputs */
 input,select,textarea{
 width:100%;padding:13px;margin:7px 0;
 border-radius:12px;border:1px solid #D1D5DB
 }
 
-/* servicios mejorados */
 .service-item{
 margin-bottom:18px;
 padding-bottom:12px;
 border-bottom:1px solid #eee;
-}
-
-.service-item:last-child{
-border-bottom:none;
-margin-bottom:0;
-padding-bottom:0;
 }
 
 .service-title{
@@ -81,7 +72,7 @@ margin-top:10px;text-decoration:none
 <body>
 
 <header>
-<img src="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/c220dab7d5dc484192a8defa395218563e72c7d9/6%20sin%20t%C3%ADtulo_20260702083634.jpg">
+<img src="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/97c42016ba31bcfc5f6aa4216a2270646f110d68/6%20sin%20t%C3%ADtulo_20260702094854.jpg">
 </header>
 
 <div class="slogan">Tu destino, nuestro compromiso</div>
@@ -90,32 +81,35 @@ margin-top:10px;text-decoration:none
 
 <div class="card">
 <h2>Ubicación</h2>
-<button class="map-tab" onclick="toggleMap()">🗺 Abrir Mapa</button>
-<div id="mapContainer"><div id="map"></div></div>
+<button id="btnMapa" class="map-tab" onclick="toggleMap()">🗺 Abrir Mapa</button>
+<div id="mapContainer">
+  <div id="map"></div>
+</div>
 </div>
 
-<button class="map-tab" onclick="toggleServicios()">📋 Nuestros Servicios</button>
+<button id="btnServicios" class="map-tab" onclick="toggleServicios()">📋 Nuestros Servicios</button>
 
 <div id="serviciosContainer">
 <div class="card">
 <h2>Servicios disponibles</h2>
+
 <p style="margin-bottom:12px;">
 En <b>Triciclos L&L</b> ofrecemos transporte rápido, seguro y confiable.
 </p>
 
 <div class="service-item">
 <div class="service-title">🚖 Transportación de pasajeros</div>
-<div>Traslados urbanos cómodos, puntuales y seguros para personas.</div>
+<div>Traslados urbanos cómodos, seguros y puntuales dentro de la ciudad.</div>
 </div>
 
 <div class="service-item">
 <div class="service-title">📦 Transportación de cargas</div>
-<div>Entrega de paquetes, compras y mercancías con rapidez y cuidado.</div>
+<div>Entrega de paquetes, compras y mercancías con total cuidado y rapidez.</div>
 </div>
 
 <div class="service-item">
 <div class="service-title">🛠 Remolque de vehículos eléctricos</div>
-<div>Servicio exclusivo de remolque de vehículos eléctricos. No incluye asistencia técnica, reparación ni diagnóstico en carretera. El traslado se realiza únicamente desde el punto de avería hasta el destino indicado.</div>
+<div>Servicio exclusivo de remolque de vehículos eléctricos. No incluye reparación, asistencia técnica ni diagnóstico. Solo traslado desde el punto de avería hasta el destino indicado.</div>
 </div>
 
 </div>
@@ -149,7 +143,7 @@ En <b>Triciclos L&L</b> ofrecemos transporte rápido, seguro y confiable.
 
 <button onclick="enviar()">Reservar por WhatsApp</button>
 
-<a class="btn2" href="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/main/Triciclos%20L%26L.apk" download>
+<a class="btn2" href="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/main/Triciclos%20L%26L.apk">
 📲 Descargar App
 </a>
 
@@ -158,41 +152,72 @@ En <b>Triciclos L&L</b> ofrecemos transporte rápido, seguro y confiable.
 </div>
 
 <script>
-const mc=document.getElementById("mapContainer");
 
-let map=L.map('map').setView([23.1136,-82.3666],13);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+const mapContainer = document.getElementById("mapContainer");
+const btnMapa = document.getElementById("btnMapa");
+
+const serviciosContainer = document.getElementById("serviciosContainer");
+const btnServicios = document.getElementById("btnServicios");
+
+// MAPA
+let map = L.map('map').setView([23.1136,-82.3666],13);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+maxZoom:19
+}).addTo(map);
 
 function toggleMap(){
-if(mc.style.display=="block"){
-mc.style.display="none";
-}else{
-mc.style.display="block";
+if(mapContainer.style.display === "block"){
+mapContainer.style.display = "none";
+btnMapa.innerHTML = "🗺 Abrir Mapa";
+} else {
+mapContainer.style.display = "block";
+btnMapa.innerHTML = "✖️ Cerrar Mapa";
 setTimeout(()=>map.invalidateSize(),200);
 }
 }
 
+// SERVICIOS
 function toggleServicios(){
-const b=document.getElementById("serviciosContainer");
-b.style.display = (b.style.display=="block") ? "none" : "block";
+if(serviciosContainer.style.display === "block"){
+serviciosContainer.style.display = "none";
+btnServicios.innerHTML = "📋 Nuestros Servicios";
+} else {
+serviciosContainer.style.display = "block";
+btnServicios.innerHTML = "✖️ Cerrar";
+}
 }
 
+// RESERVA WHATSAPP
 function enviar(){
-const n=nombre.value,t=tel.value,o=origen.value,d=destino.value,p=pas.value,pg=pago.value,ob=obs.value;
-if(!n||!t||!o||!d){alert("Completa todos los campos");return;}
 
-let m=encodeURIComponent(`🚖 NUEVA RESERVA
+const n = document.getElementById("nombre").value;
+const t = document.getElementById("tel").value;
+const o = document.getElementById("origen").value;
+const d = document.getElementById("destino").value;
+const p = document.getElementById("pas").value;
+const pg = document.getElementById("pago").value;
+const ob = document.getElementById("obs").value;
 
-👤 ${n}
-📞 ${t}
-📍 ${o}
-🏁 ${d}
-👥 ${p}
-💳 ${pg}
-📝 ${ob}`);
-
-window.open("https://wa.me/5354632153?text="+m);
+if(!n || !t || !o || !d){
+alert("Completa todos los campos obligatorios");
+return;
 }
+
+let mensaje = encodeURIComponent(
+`🚖 NUEVA RESERVA
+
+👤 Nombre: ${n}
+📞 Teléfono: ${t}
+📍 Recogida: ${o}
+🏁 Destino: ${d}
+👥 Pasajeros: ${p}
+💳 Pago: ${pg}
+📝 Obs: ${ob}`
+);
+
+window.open("https://wa.me/5354632153?text=" + mensaje);
+}
+
 </script>
 
 </body>
