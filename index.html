@@ -34,15 +34,24 @@ box-shadow:0 6px 18px rgba(0,0,0,.06)
 
 h2{margin-bottom:10px}
 
+/* botones */
 .map-tab,button{
 width:100%;padding:14px;border:none;border-radius:14px;
 background:var(--r);color:#fff;font-weight:700;cursor:pointer
 }
 
+/* mapa y servicios ocultos */
 #mapContainer,#serviciosContainer{display:none}
 
 #map{height:55vh;min-height:320px;border-radius:16px}
 
+/* inputs */
+input,select,textarea{
+width:100%;padding:13px;margin:7px 0;
+border-radius:12px;border:1px solid #D1D5DB
+}
+
+/* servicios mejorados */
 .service-item{
 margin-bottom:18px;
 padding-bottom:12px;
@@ -66,18 +75,6 @@ border-radius:14px;background:#fff;
 border:1px solid #D1D5DB;color:#111827;
 margin-top:10px;text-decoration:none
 }
-
-/* inputs reserva */
-input,select,textarea{
-width:100%;
-padding:12px;
-margin:6px 0;
-border-radius:10px;
-border:1px solid #ddd;
-font-size:15px;
-}
-
-textarea{resize:none;height:80px}
 </style>
 </head>
 
@@ -102,20 +99,23 @@ textarea{resize:none;height:80px}
 <div id="serviciosContainer">
 <div class="card">
 <h2>Servicios disponibles</h2>
+<p style="margin-bottom:12px;">
+En <b>Triciclos L&L</b> ofrecemos transporte rápido, seguro y confiable.
+</p>
 
 <div class="service-item">
 <div class="service-title">🚖 Transportación de pasajeros</div>
-<div>Traslados seguros y rápidos.</div>
+<div>Traslados urbanos cómodos, puntuales y seguros para personas.</div>
 </div>
 
 <div class="service-item">
 <div class="service-title">📦 Transportación de cargas</div>
-<div>Entrega de paquetes y mercancías.</div>
+<div>Entrega de paquetes, compras y mercancías con rapidez y cuidado.</div>
 </div>
 
 <div class="service-item">
 <div class="service-title">🛠 Remolque de vehículos eléctricos</div>
-<div>Asistencia en carretera.</div>
+<div>Servicio exclusivo de remolque de vehículos eléctricos. No incluye asistencia técnica, reparación ni diagnóstico en carretera. El traslado se realiza únicamente desde el punto de avería hasta el destino indicado.</div>
 </div>
 
 </div>
@@ -124,33 +124,33 @@ textarea{resize:none;height:80px}
 <div class="card">
 <h2>Reserva tu viaje</h2>
 
-<input id="nombre" placeholder="Nombre completo" required>
-<input id="tel" placeholder="Teléfono" required>
-<input id="origen" placeholder="Lugar de recogida" required>
-<input id="destino" placeholder="Destino" required>
+<input id="nombre" placeholder="Nombre">
+<input id="tel" placeholder="Teléfono">
+<input id="origen" placeholder="Lugar de recogida">
+<input id="destino" placeholder="Destino">
 
-<select id="pas" required>
-<option value="" disabled selected>Cantidad de pasajeros</option>
-<option value="1">1 pasajero</option>
-<option value="2">2 pasajeros</option>
-<option value="3">3 pasajeros</option>
-<option value="4">4 pasajeros</option>
-<option value="5">5 pasajeros</option>
-<option value="6">6 pasajeros</option>
+<select id="pas">
+<option disabled selected>Cantidad de pasajeros</option>
+<option>1 pasajero</option>
+<option>2 pasajeros</option>
+<option>3 pasajeros</option>
+<option>4 pasajeros</option>
+<option>5 pasajeros</option>
+<option>6 pasajeros</option>
 </select>
 
-<select id="pago" required>
-<option value="" disabled selected>Método de pago</option>
-<option value="Efectivo">Efectivo</option>
-<option value="Transferencia">Transferencia</option>
+<select id="pago">
+<option disabled selected>Método de pago</option>
+<option>Efectivo</option>
+<option>Transferencia</option>
 </select>
 
-<textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
+<textarea id="obs" placeholder="Observaciones"></textarea>
 
-<button onclick="enviar()">📲 Reservar por WhatsApp</button>
+<button onclick="enviar()">Reservar por WhatsApp</button>
 
-<a class="btn2" href="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/main/Triciclos%20L%26L.apk">
-⬇️ Descargar App
+<a class="btn2" href="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/main/Triciclos%20L%26L.apk" download>
+📲 Descargar App
 </a>
 
 </div>
@@ -166,40 +166,20 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo
 function toggleMap(){
 if(mc.style.display=="block"){
 mc.style.display="none";
-document.querySelector('.map-tab').textContent="🗺 Abrir Mapa";
 }else{
 mc.style.display="block";
-document.querySelector('.map-tab').textContent="✖️ Cerrar Mapa";
 setTimeout(()=>map.invalidateSize(),200);
 }
 }
 
 function toggleServicios(){
 const b=document.getElementById("serviciosContainer");
-const btn=document.querySelectorAll('.map-tab')[1];
-
-if(b.style.display=="block"){
-b.style.display="none";
-btn.textContent="📋 Nuestros Servicios";
-}else{
-b.style.display="block";
-btn.textContent="✖️ Cerrar";
-}
+b.style.display = (b.style.display=="block") ? "none" : "block";
 }
 
 function enviar(){
-const n=document.getElementById("nombre").value;
-const t=document.getElementById("tel").value;
-const o=document.getElementById("origen").value;
-const d=document.getElementById("destino").value;
-const p=document.getElementById("pas").value;
-const pg=document.getElementById("pago").value;
-const ob=document.getElementById("obs").value;
-
-if(!n||!t||!o||!d||!p||!pg){
-alert("Completa todos los campos");
-return;
-}
+const n=nombre.value,t=tel.value,o=origen.value,d=destino.value,p=pas.value,pg=pago.value,ob=obs.value;
+if(!n||!t||!o||!d){alert("Completa todos los campos");return;}
 
 let m=encodeURIComponent(`🚖 NUEVA RESERVA
 
