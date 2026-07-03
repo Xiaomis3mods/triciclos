@@ -6,15 +6,50 @@
 <title>Triciclos L&L Pro</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-:root{--r:#E63946;--bg:#F3F6FA;--card:#fff;--text:#1F2937;--border:#E5E7EB}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
 
-body{background:var(--bg);color:var(--text)}
+/* 🚫 QUITAR AZUL AL TOCAR */
+*{
+-webkit-tap-highlight-color: transparent;
+}
 
-header img{width:100%;height:240px;object-fit:cover;border-radius:0 0 28px 28px}
-.slogan{background:#fff;padding:14px;text-align:center;font-weight:700}
+:root{
+--r:#E63946;
+--bg:#F3F6FA;
+--card:#fff;
+--text:#1F2937;
+--border:#E5E7EB;
+}
 
-.container{max-width:820px;margin:auto;padding:14px}
+body{
+background:var(--bg);
+color:var(--text);
+}
+
+header img{
+width:100%;
+height:240px;
+object-fit:cover;
+border-radius:0 0 28px 28px;
+}
+
+.slogan{
+background:#fff;
+padding:14px;
+text-align:center;
+font-weight:700;
+}
+
+.container{
+max-width:850px;
+margin:auto;
+padding:14px;
+}
 
 .card{
 background:#fff;
@@ -22,11 +57,11 @@ padding:18px;
 border-radius:18px;
 margin:14px 0;
 border:1px solid var(--border);
-box-shadow:0 6px 18px rgba(0,0,0,.06)
+box-shadow:0 6px 18px rgba(0,0,0,.06);
 }
 
 /* BOTONES */
-button,.btn2{
+button,.btn{
 display:block;
 width:100%;
 padding:16px;
@@ -38,14 +73,15 @@ margin-top:10px;
 transition:.2s;
 box-shadow:0 6px 14px rgba(0,0,0,.15);
 text-decoration:none;
+border:none;
 }
 
-button{background:var(--r);color:#fff;border:none}
-.btn2{background:#fff;color:#111827;border:1px solid #D1D5DB}
+button{background:var(--r);color:#fff}
+.btn{background:#fff;color:#111827;border:1px solid #D1D5DB}
 
-button:active,.btn2:active{
+button:active,.btn:active{
 transform:scale(.96);
-filter:brightness(.95)
+filter:brightness(.95);
 }
 
 /* FORM */
@@ -57,22 +93,42 @@ border-radius:12px;
 border:1px solid #D1D5DB;
 }
 
+label{
+display:block;
+margin-top:10px;
+font-weight:700;
+}
+
 /* SERVICIOS */
-#servicios{display:none}
+#servicios{
+display:none;
+animation:fade .3s ease;
+}
+
+@keyframes fade{
+from{opacity:0;transform:translateY(10px)}
+to{opacity:1;transform:translateY(0)}
+}
+
 .service-card{
 background:#fff;
 padding:16px;
 border-radius:16px;
 border:1px solid #E5E7EB;
 margin:10px 0;
-box-shadow:0 4px 12px rgba(0,0,0,.06)
+box-shadow:0 4px 12px rgba(0,0,0,.06);
 }
-.service-title{font-weight:800}
-.service-text{font-size:14px;color:#374151;margin-top:5px}
 
-*{-webkit-tap-highlight-color:transparent;}
-button,a,.btn,select,input,textarea{outline:none;-webkit-tap-highlight-color:transparent;}
+.service-title{
+font-weight:800;
+margin-bottom:6px;
+}
 
+.service-text{
+font-size:14px;
+line-height:1.5;
+color:#374151;
+}
 </style>
 </head>
 
@@ -89,29 +145,38 @@ button,a,.btn,select,input,textarea{outline:none;-webkit-tap-highlight-color:tra
 <!-- UBICACIÓN -->
 <div class="card">
 <h2>Ubicación</h2>
-<button onclick="openMaps()">🗺 Abrir Google Maps</button>
+<button onclick="openMaps()">Abrir ubicación en Google Maps</button>
 </div>
 
 <!-- SERVICIOS -->
 <div class="card">
 <h2>Información</h2>
-<button onclick="toggleServicios()">📋 Nuestros Servicios</button>
+<button onclick="toggleServicios()">Nuestros Servicios</button>
 
 <div id="servicios">
 
 <div class="service-card">
-<div class="service-title">🚖 Transporte de Pasajeros</div>
-<div class="service-text">Traslados urbanos seguros, rápidos y cómodos.</div>
+<div class="service-title">🚖 Traslado de Pasajeros</div>
+<div class="service-text">
+Servicio profesional de traslado de pasajeros en triciclos eléctricos, seguro, puntual y cómodo.
+Realizamos viajes urbanos y suburbanos para trabajo, compras, citas médicas y traslados personales.
+</div>
 </div>
 
 <div class="service-card">
-<div class="service-title">📦 Envío de Cargas</div>
-<div class="service-text">Entrega de paquetes con puntualidad y cuidado.</div>
+<div class="service-title">📦 Traslado de Cargas</div>
+<div class="service-text">
+Transporte seguro de paquetes, mercancías y objetos ligeros o medianos, garantizando cuidado,
+responsabilidad y entrega puntual en cada servicio.
+</div>
 </div>
 
 <div class="service-card">
 <div class="service-title">🛠 Remolque de Vehículos Eléctricos</div>
-<div class="service-text"><b>Solo remolque.</b> No incluye reparación ni asistencia técnica.</div>
+<div class="service-text">
+Servicio exclusivo de remolque para vehículos eléctricos que no puedan continuar su recorrido.
+No incluye reparación, diagnóstico ni asistencia técnica.
+</div>
 </div>
 
 </div>
@@ -123,11 +188,11 @@ button,a,.btn,select,input,textarea{outline:none;-webkit-tap-highlight-color:tra
 
 <input id="nombre" placeholder="Nombre">
 <input id="tel" placeholder="Teléfono">
-<input id="origen" placeholder="Lugar de recogida">
+<input id="origen" placeholder="Recogida">
 <input id="destino" placeholder="Destino">
 
+<label>Cantidad de pasajeros</label>
 <select id="pas">
-<option value="">Pasajeros</option>
 <option>1</option>
 <option>2</option>
 <option>3</option>
@@ -136,17 +201,17 @@ button,a,.btn,select,input,textarea{outline:none;-webkit-tap-highlight-color:tra
 <option>6</option>
 </select>
 
+<label>Método de pago</label>
 <select id="pago">
-<option value="">Método de pago</option>
 <option>Efectivo</option>
 <option>Transferencia</option>
 </select>
 
 <textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
 
-<button onclick="enviarWhatsApp()">🟢 WhatsApp</button>
-<a class="btn2" onclick="enviarSMS()">📩 SMS</a>
-<a class="btn2" href="tel:+5354632153">📞 Llamar</a>
+<button onclick="enviarWhatsApp()">Reservar por WhatsApp</button>
+<a class="btn" onclick="enviarSMS()">Reservar por SMS</a>
+<a class="btn" href="tel:+5354632153">Llamar ahora</a>
 
 </div>
 
@@ -154,19 +219,39 @@ button,a,.btn,select,input,textarea{outline:none;-webkit-tap-highlight-color:tra
 
 <script>
 
-// 📍 MAPA
+/* 📳 vibración */
+function vibrar(){
+if(navigator.vibrate){
+navigator.vibrate(80);
+}
+}
+
+document.addEventListener("click",(e)=>{
+if(e.target.tagName==="BUTTON"||e.target.tagName==="A"){
+vibrar();
+}
+});
+
+/* MAPA */
 function openMaps(){
+if(navigator.geolocation){
+navigator.geolocation.getCurrentPosition(pos=>{
+const lat=pos.coords.latitude;
+const lng=pos.coords.longitude;
+window.open(`https://www.google.com/maps?q=${lat},${lng}`,"_blank");
+});
+}else{
 window.open("https://www.google.com/maps","_blank");
 }
-
-// 📋 SERVICIOS
-function toggleServicios(){
-const s=document.getElementById("servicios");
-s.style.display = (s.style.display==="block") ? "none" : "block";
 }
 
-// 📩 MENSAJE
+/* SERVICIOS */
+function toggleServicios(){
+const s=document.getElementById("servicios");
+s.style.display = s.style.display==="block" ? "none" : "block";
+}
 
+/* MENSAJE FORMATO NUEVO */
 function mensaje(){
 
 const g=id=>document.getElementById(id).value.trim();
@@ -195,19 +280,7 @@ return `🚖 NUEVA RESERVA
 📝 Observaciones: ${obs||"Ninguna"}`;
 }
 
-
-return `🚖 NUEVA RESERVA
-
-👤 ${nombre}
-📞 ${tel}
-📍 ${origen}
-🏁 ${destino}
-👥 ${pas}
-💳 ${pago}
-📝 ${obs || "Ninguna"}`;
-}
-
-// 🟢 WHATSAPP
+/* WHATSAPP */
 function enviarWhatsApp(){
 const m=mensaje();
 if(m){
@@ -215,7 +288,7 @@ window.open("https://wa.me/5354632153?text="+encodeURIComponent(m));
 }
 }
 
-// 📩 SMS
+/* SMS */
 function enviarSMS(){
 const m=mensaje();
 if(m){
