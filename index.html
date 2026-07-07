@@ -3,11 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Triciclos L&L <!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Triciclos L&L Pro</title>
 
 <link rel="manifest" href="manifest.json">
@@ -135,7 +130,7 @@ border:none;
 }
 
 button{background:var(--r);color:#fff}
-.btn{background:#fff;color:#111827;border:1px solid #D1D5DB}
+.btn{background:var(--r);color:#fff;border:none}
 .btn-call{background:var(--g);color:#fff;border:none}
 
 /* Estilo por defecto para botones dentro del menú de información */
@@ -220,7 +215,7 @@ font-weight:700;
 }
 
 /* BOTÓN DE INSTALACIÓN DINÁMICO */
-#btnInstalar PWA {
+#btnInstalar {
 display: none; /* Se activa por JavaScript solo si es instalable */
 background: #111827;
 color: #fff;
@@ -305,12 +300,19 @@ La web abrirá su aplicación con el texto ya redactado. Solo presione <strong>e
 <div class="card">
 <h2>Reserva</h2>
 
+<label id="lbl-nombre" for="nombre" class="sr-only" style="display:none;">Nombre</label>
 <input id="nombre" type="text" autocomplete="name" placeholder="Nombre">
+
+<label id="lbl-tel" for="tel" class="sr-only" style="display:none;">Teléfono</label>
 <input id="tel" type="tel" autocomplete="tel" placeholder="Teléfono">
+
+<label id="lbl-origen" for="origen" class="sr-only" style="display:none;">Recogida</label>
 <input id="origen" placeholder="Recogida">
+
+<label id="lbl-destino" for="destino" class="sr-only" style="display:none;">Destino</label>
 <input id="destino" placeholder="Destino">
 
-<label>Cantidad de pasajeros</label>
+<label for="pas">Cantidad de pasajeros</label>
 <select id="pas">
 <option>1</option>
 <option>2</option>
@@ -320,16 +322,17 @@ La web abrirá su aplicación con el texto ya redactado. Solo presione <strong>e
 <option>6</option>
 </select>
 
-<label>Método de pago</label>
+<label for="pago">Método de pago</label>
 <select id="pago">
 <option>Efectivo</option>
 <option>Transferencia</option>
 </select>
 
+<label id="lbl-obs" for="obs" class="sr-only" style="display:none;">Observaciones</label>
 <textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
 
-<button onclick="enviarWhatsApp()" style="background: var(--r); color: #fff;">Reservar por WhatsApp</button>
-<a class="btn" onclick="enviarSMS()" style="background: var(--r); color: #fff; border: none;">Reservar por SMS</a>
+<button onclick="enviarWhatsApp()">Reservar por WhatsApp</button>
+<a href="#" id="btnSms" class="btn">Reservar por SMS</a>
 <a class="btn btn-call" href="tel:+5354632153">Llamar ahora</a>
 
 </div>
@@ -427,7 +430,8 @@ window.open("https://wa.me/5354632153?text="+encodeURIComponent(m));
 }
 
 /* COMPARTIR POR SMS */
-function enviarSMS(){
+function enviarSMS(e){
+if(e) e.preventDefault();
 const m=mensaje();
 if(m){
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -436,6 +440,9 @@ location.href="sms:+5354632153" + separador + "body=" + encodeURIComponent(m);
 }
 }
 
+// Vinculación limpia del evento SMS
+document.getElementById('btnSms').addEventListener('click', enviarSMS);
+
 /* ===================================================
    🚀 SISTEMA AUTOMÁTICO DE INSTALACIÓN PWA
    =================================================== */
@@ -443,17 +450,16 @@ location.href="sms:+5354632153" + separador + "body=" + encodeURIComponent(m);
 let eventoInstalacion;
 const btnInstalar = document.getElementById('btnInstalar');
 
-// Captura la orden de instalación nativa que ofrece el navegador
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault(); // Evitamos que salte de golpe de forma intrusiva
-  eventoInstalacion = e; // Guardamos el evento
-  btnInstalar.style.display = 'block'; // Mostramos nuestro botón personalizado estilizado
+  e.preventDefault(); 
+  eventoInstalacion = e; 
+  btnInstalar.style.display = 'block'; 
 });
 
 function instalarApp() {
   if (!eventoInstalacion) return;
-  btnInstalar.style.display = 'none'; // Escondemos el botón tras pulsar
-  eventoInstalacion.prompt(); // Desplegamos el menú nativo del sistema operativo
+  btnInstalar.style.display = 'none'; 
+  eventoInstalacion.prompt(); 
   eventoInstalacion.userChoice.then((choiceResult) => {
     if (choiceResult.outcome === 'accepted') {
       console.log('El usuario aceptó instalar Triciclos L&L');
@@ -462,13 +468,12 @@ function instalarApp() {
   });
 }
 
-// Oculta el botón automáticamente si la app ya está instalada o abierta desde el icono
 window.addEventListener('appinstalled', () => {
   btnInstalar.style.display = 'none';
   eventoInstalacion = null;
 });
 
-// REGISTRO DEL SERVICE WORKER VIRTUAL (Truco para usar un solo archivo HTML)
+// REGISTRO DEL SERVICE WORKER VIRTUAL
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     const swCode = `
@@ -481,303 +486,6 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register(swUrl).catch(err => console.log("SW Error:", err));
   });
 }
-</script>
-
-</body>
-</html>
-</title>
-
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
-/* 🚫 QUITAR AZUL AL TOCAR */
-*{
--webkit-tap-highlight-color: transparent;
-}
-
-:root{
---r:#E63946;
---bg:#F3F6FA;
---card:#fff;
---text:#1F2937;
---border:#E5E7EB;
-}
-
-body{
-background:var(--bg);
-color:var(--text);
-}
-
-header img{
-width:100%;
-height:240px;
-object-fit:cover;
-border-radius:0 0 28px 28px;
-}
-
-.slogan{
-background:#fff;
-padding:14px;
-text-align:center;
-font-weight:700;
-}
-
-.container{
-max-width:850px;
-margin:auto;
-padding:14px;
-}
-
-.card{
-background:#fff;
-padding:18px;
-border-radius:18px;
-margin:14px 0;
-border:1px solid var(--border);
-box-shadow:0 6px 18px rgba(0,0,0,.06);
-}
-
-/* BOTONES */
-button,.btn{
-display:block;
-width:100%;
-padding:16px;
-border-radius:999px;
-font-weight:700;
-cursor:pointer;
-text-align:center;
-margin-top:10px;
-transition:.2s;
-box-shadow:0 6px 14px rgba(0,0,0,.15);
-text-decoration:none;
-border:none;
-}
-
-button{background:var(--r);color:#fff}
-.btn{background:#fff;color:#111827;border:1px solid #D1D5DB}
-
-button:active,.btn:active{
-transform:scale(.96);
-filter:brightness(.95);
-}
-
-/* FORM */
-input,select,textarea{
-width:100%;
-padding:13px;
-margin:7px 0;
-border-radius:12px;
-border:1px solid #D1D5DB;
-}
-
-label{
-display:block;
-margin-top:10px;
-font-weight:700;
-}
-
-/* SERVICIOS */
-#servicios{
-display:none;
-animation:fade .3s ease;
-}
-
-@keyframes fade{
-from{opacity:0;transform:translateY(10px)}
-to{opacity:1;transform:translateY(0)}
-}
-
-.service-card{
-background:#fff;
-padding:16px;
-border-radius:16px;
-border:1px solid #E5E7EB;
-margin:10px 0;
-box-shadow:0 4px 12px rgba(0,0,0,.06);
-}
-
-.service-title{
-font-weight:800;
-margin-bottom:6px;
-}
-
-.service-text{
-font-size:14px;
-line-height:1.5;
-color:#374151;
-}
-</style>
-</head>
-
-<body>
-
-<header>
-<img src="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/97c42016ba31bcfc5f6aa4216a2270646f110d68/6%20sin%20t%C3%ADtulo_20260702094854.jpg">
-</header>
-
-<div class="slogan">Tu destino, nuestro compromiso</div>
-
-<div class="container">
-
-<!-- UBICACIÓN -->
-<div class="card">
-<h2>Ubicación</h2>
-<button onclick="openMaps()">Abrir ubicación en Google Maps</button>
-</div>
-
-<!-- SERVICIOS -->
-<div class="card">
-<h2>Información</h2>
-<button onclick="toggleServicios()">Nuestros Servicios</button>
-
-<div id="servicios">
-
-<div class="service-card">
-<div class="service-title">🚖 Traslado de Pasajeros</div>
-<div class="service-text">
-Servicio profesional de traslado de pasajeros en triciclos eléctricos, seguro, puntual y cómodo.
-Realizamos viajes urbanos y suburbanos para trabajo, compras, citas médicas y traslados personales.
-</div>
-</div>
-
-<div class="service-card">
-<div class="service-title">📦 Traslado de Cargas</div>
-<div class="service-text">
-Transporte seguro de paquetes, mercancías y objetos ligeros o medianos, garantizando cuidado,
-responsabilidad y entrega puntual en cada servicio.
-</div>
-</div>
-
-<div class="service-card">
-<div class="service-title">🛠 Remolque de Vehículos Eléctricos</div>
-<div class="service-text">
-Servicio exclusivo de remolque para vehículos eléctricos que no puedan continuar su recorrido.
-No incluye reparación, diagnóstico ni asistencia técnica.
-</div>
-</div>
-
-</div>
-</div>
-
-<!-- RESERVA -->
-<div class="card">
-<h2>Reserva</h2>
-
-<input id="nombre" placeholder="Nombre">
-<input id="tel" placeholder="Teléfono">
-<input id="origen" placeholder="Recogida">
-<input id="destino" placeholder="Destino">
-
-<label>Cantidad de pasajeros</label>
-<select id="pas">
-<option>1</option>
-<option>2</option>
-<option>3</option>
-<option>4</option>
-<option>5</option>
-<option>6</option>
-</select>
-
-<label>Método de pago</label>
-<select id="pago">
-<option>Efectivo</option>
-<option>Transferencia</option>
-</select>
-
-<textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
-
-<button onclick="enviarWhatsApp()">Reservar por WhatsApp</button>
-<a class="btn" onclick="enviarSMS()">Reservar por SMS</a>
-<a class="btn" href="tel:+5354632153">Llamar ahora</a>
-
-</div>
-
-</div>
-
-<script>
-
-/* 📳 vibración */
-function vibrar(){
-if(navigator.vibrate){
-navigator.vibrate(80);
-}
-}
-
-document.addEventListener("click",(e)=>{
-if(e.target.tagName==="BUTTON"||e.target.tagName==="A"){
-vibrar();
-}
-});
-
-/* MAPA */
-function openMaps(){
-if(navigator.geolocation){
-navigator.geolocation.getCurrentPosition(pos=>{
-const lat=pos.coords.latitude;
-const lng=pos.coords.longitude;
-window.open(`https://www.google.com/maps?q=${lat},${lng}`,"_blank");
-});
-}else{
-window.open("https://www.google.com/maps","_blank");
-}
-}
-
-/* SERVICIOS */
-function toggleServicios(){
-const s=document.getElementById("servicios");
-s.style.display = s.style.display==="block" ? "none" : "block";
-}
-
-/* MENSAJE FORMATO NUEVO */
-function mensaje(){
-
-const g=id=>document.getElementById(id).value.trim();
-
-const nombre=g("nombre");
-const tel=g("tel");
-const origen=g("origen");
-const destino=g("destino");
-const pas=g("pas");
-const pago=g("pago");
-const obs=g("obs");
-
-if(!nombre||!tel||!origen||!destino||!pas||!pago){
-alert("Completa todos los campos obligatorios");
-return null;
-}
-
-return `🚖 NUEVA RESERVA
-
-👤 Nombre: ${nombre}
-📞 Teléfono: ${tel}
-📍 Recogida: ${origen}
-🏁 Destino: ${destino}
-👥 Pasajeros: ${pas}
-💳 Método de pago: ${pago}
-📝 Observaciones: ${obs||"Ninguna"}`;
-}
-
-/* WHATSAPP */
-function enviarWhatsApp(){
-const m=mensaje();
-if(m){
-window.open("https://wa.me/5354632153?text="+encodeURIComponent(m));
-}
-}
-
-/* SMS */
-function enviarSMS(){
-const m=mensaje();
-if(m){
-location.href="sms:+5354632153?body="+encodeURIComponent(m);
-}
-}
-
 </script>
 
 </body>
