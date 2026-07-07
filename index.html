@@ -1,492 +1,544 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Triciclos L&L Pro</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triciclos L&L Pro</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="#E63946">
-<meta name="apple-mobile-web-app-title" content="Triciclos L&L">
-<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/97c42016ba31bcfc5f6aa4216a2270646f110d68/6%20sin%20t%C3%ADtulo_20260702094854.jpg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#E63946">
+    <meta name="apple-mobile-web-app-title" content="Triciclos L&L">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/97c42016ba31bcfc5f6aa4216a2270646f110d68/6%20sin%20t%C3%ADtulo_20260702094854.jpg">
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-/* 🚫 QUITAR AZUL AL TOCAR */
-*{
--webkit-tap-highlight-color: transparent;
-}
+        :root {
+            --r: #E63946;
+            --g: #25D366; 
+            --bg: #F3F6FA;
+            --card: #fff;
+            --text: #1F2937;
+            --border: #E5E7EB;
+        }
 
-:root{
---r:#E63946;
---g:#25D366; /* Verde para llamadas/soporte */
---bg:#F3F6FA;
---card:#fff;
---text:#1F2937;
---border:#E5E7EB;
-}
+        body {
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
 
-body{
-background:var(--bg);
-color:var(--text);
-}
+        body.menu-abierto {
+            overflow: hidden; /* Evita scroll de fondo cuando el menú está abierto */
+        }
 
-header img{
-width:100%;
-height:240px;
-object-fit:cover;
-border-radius:0 0 28px 28px;
-}
+        header {
+            position: relative;
+        }
 
-.slogan{
-background:#fff;
-padding:14px;
-text-align:center;
-font-weight:700;
-border-bottom:1px solid var(--border);
-}
+        header img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            border-radius: 0 0 28px 28px;
+            display: block;
+        }
 
-.container{
-max-width:850px;
-margin:auto;
-padding:14px;
-}
+        /* 📌 BOTÓN FLOTANTE PERMANENTE EN LA PARTE SUPERIOR DERECHA */
+        .menu-trigger {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 1001;
+            background: var(--r);
+            color: #fff;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,.3);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s;
+        }
 
-.card{
-background:#fff;
-padding:18px;
-border-radius:18px;
-margin:14px 0;
-border:1px solid var(--border);
-box-shadow:0 6px 18px rgba(0,0,0,.06);
-}
+        .menu-trigger.active {
+            background: #111827; /* Cambia a un tono oscuro neutro al estar activo */
+            transform: scale(1.05);
+        }
 
-.card-intro{
-font-size:14px;
-color:#4B5563;
-line-height:1.5;
-margin-bottom:12px;
-text-align:center;
-}
+        .slogan {
+            background: #fff;
+            padding: 14px;
+            text-align: center;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+        }
 
-/* MENÚ DESPLEGABLE DE CABECERA */
-.menu-container {
-background: transparent;
-margin-bottom: 14px;
-overflow: hidden;
-}
+        .container {
+            max-width: 850px;
+            margin: auto;
+            padding: 14px;
+        }
 
-.menu-trigger {
-width: 100%;
-background: var(--r);
-color: #fff;
-padding: 16px;
-font-weight: 700;
-text-align: center;
-cursor: pointer;
-border: none;
-display: flex;
-justify-content: center;
-align-items: center;
-gap: 8px;
-margin-top: 0;
-border-radius: 999px; /* Forma de píldora */
-box-shadow: 0 6px 14px rgba(0,0,0,.15);
-transition: .2s;
-}
+        .card {
+            background: #fff;
+            padding: 18px;
+            border-radius: 18px;
+            margin: 14px 0;
+            border: 1px solid var(--border);
+            box-shadow: 0 6px 18px rgba(0,0,0,.06);
+        }
 
-.menu-content {
-display: none;
-padding: 16px;
-background: #fff;
-border-radius: 18px;
-margin-top: 12px;
-animation: fade .3s ease;
-border: 1px solid var(--border);
-box-shadow: 0 6px 18px rgba(0,0,0,.06);
-}
+        .card-intro {
+            font-size: 14px;
+            color: #4B5563;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            text-align: center;
+        }
 
-/* BOTONES */
-button,.btn{
-display:block;
-width:100%;
-padding:16px;
-border-radius:999px;
-font-weight:700;
-cursor:pointer;
-text-align:center;
-margin-top:10px;
-transition:.2s;
-box-shadow:0 6px 14px rgba(0,0,0,.15);
-text-decoration:none;
-border:none;
-}
+        /* 📱 MENÚ DESPLEGABLE LATERAL DERECHO */
+        .menu-content {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 85%;
+            max-width: 400px;
+            height: 100%;
+            background: #fff;
+            z-index: 1000;
+            box-shadow: -6px 0 24px rgba(0,0,0,.15);
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 80px 20px 20px 20px;
+            overflow-y: auto;
+        }
 
-button{background:var(--r);color:#fff}
-.btn{background:var(--r);color:#fff;border:none}
-.btn-call{background:var(--g);color:#fff;border:none}
+        .menu-content.open {
+            right: 0;
+        }
 
-/* Estilo por defecto para botones dentro del menú de información */
-.menu-content .btn-info {
-background: #fff;
-color: #111827;
-border: 1px solid #D1D5DB;
-box-shadow: 0 4px 10px rgba(0,0,0,.08);
-}
+        /* CAPA OSCURA DE FONDO */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-/* Clase activa para resaltar el botón seleccionado en el menú */
-.menu-content .btn-info.active {
-background: var(--r) !important;
-color: #fff !important;
-border-color: var(--r) !important;
-}
+        .menu-overlay.show {
+            display: block;
+            opacity: 1;
+        }
 
-button:active,.btn:active, .menu-trigger:active {
-transform:scale(.96);
-filter:brightness(.95);
-}
+        /* BOTONES DEL SISTEMA */
+        button, .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 10px;
+            transition: .2s;
+            box-shadow: 0 6px 14px rgba(0,0,0,.15);
+            text-decoration: none;
+            border: none;
+        }
 
-/* SECCIONES INTERNAS EN EL MENÚ */
-.desplegable-info {
-display:none;
-animation:fade .3s ease;
-margin-top: 12px;
-}
+        button { background: var(--r); color: #fff; }
+        .btn { background: var(--r); color: #fff; }
+        .btn-call { background: var(--g); color: #fff; }
 
-@keyframes fade{
-from{opacity:0;transform:translateY(10px)}
-to{opacity:1;transform:translateY(0)}
-}
+        .menu-content .btn-info {
+            background: #fff;
+            color: #111827;
+            border: 1px solid #D1D5DB;
+            box-shadow: 0 4px 10px rgba(0,0,0,.08);
+        }
 
-.service-card{
-background:#fff;
-padding:16px;
-border-radius:16px;
-border:1px solid #E5E7EB;
-margin:10px 0;
-box-shadow:0 4px 12px rgba(0,0,0,.06);
-}
+        .menu-content .btn-info.active {
+            background: var(--r) !important;
+            color: #fff !important;
+            border-color: var(--r) !important;
+        }
 
-.service-title{
-font-weight:800;
-margin-bottom:6px;
-}
+        button:active, .btn:active, .menu-trigger:active {
+            transform: scale(.96);
+            filter: brightness(.95);
+        }
 
-.service-text{
-font-size:14px;
-line-height:1.5;
-color:#374151;
-}
+        /* SECCIONES INTERNAS EN EL PANEL LATERAL */
+        .desplegable-info {
+            display: none;
+            animation: fade .3s ease;
+            margin-top: 12px;
+        }
 
-.step-number{
-background:var(--r);
-color:#fff;
-display:inline-block;
-width:24px;
-height:24px;
-border-radius:50%;
-text-align:center;
-line-height:24px;
-font-size:12px;
-font-weight:bold;
-margin-right:6px;
-}
+        @keyframes fade {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-/* FORM */
-input,select,textarea{
-width:100%;
-padding:13px;
-margin:7px 0;
-border-radius:12px;
-border:1px solid #D1D5DB;
-}
+        .service-card {
+            background: #F9FAFB;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid #E5E7EB;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,.02);
+        }
 
-label{
-display:block;
-margin-top:10px;
-font-weight:700;
-}
+        .service-title {
+            font-weight: 800;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
 
-/* BOTÓN DE INSTALACIÓN DINÁMICO */
-#btnInstalar {
-display: none; /* Se activa por JavaScript solo si es instalable */
-background: #111827;
-color: #fff;
-margin-bottom: 14px;
-}
-</style>
+        .service-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #374151;
+        }
+
+        .step-number {
+            background: var(--r);
+            color: #fff;
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 22px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 6px;
+        }
+
+        /* FORMULARIO */
+        input, select, textarea {
+            width: 100%;
+            padding: 13px;
+            margin: 7px 0;
+            border-radius: 12px;
+            border: 1px solid #D1D5DB;
+            font-size: 16px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: 700;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        #btnInstalar {
+            display: none;
+            background: #111827;
+            color: #fff;
+            margin-bottom: 14px;
+        }
+    </style>
 </head>
 
 <body>
 
-<header>
-<img src="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/97c42016ba31bcfc5f6aa4216a2270646f110d68/6%20sin%20t%C3%ADtulo_20260702094854.jpg" loading="lazy" alt="Banner Triciclos L&L">
-</header>
+    <header>
+        <!-- Botón del menú optimizado con estados accesibles y visuales -->
+        <button id="menuBtn" class="menu-trigger" onclick="toggleMenu()" aria-label="Abrir información">☰</button>
+        <img src="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/97c42016ba31bcfc5f6aa4216a2270646f110d68/6%20sin%20t%C3%ADtulo_20260702094854.jpg" loading="lazy" alt="Banner Triciclos L&L">
+    </header>
 
-<div class="slogan">Tu destino, nuestro compromiso</div>
+    <div class="slogan">Tu destino, nuestro compromiso</div>
 
-<div class="container">
+    <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
 
-<button id="btnInstalar" onclick="instalarApp()">📲 Instalar Aplicación Móvil</button>
+    <nav id="menuContent" class="menu-content">
+        <p class="card-intro">En Triciclos L&L contamos con un equipo de choferes profesionales altamente experimentados y comprometidos con brindarle una conducción segura y eficiente.</p>
 
-<div class="menu-container">
-<button class="menu-trigger" onclick="toggleMenu()">
-ℹ️ Más Información
-</button>
-<div id="menuContent" class="menu-content">
-<p class="card-intro">En Triciclos L&L contamos con un equipo de choferes profesionales altamente experimentados y comprometidos con brindarle una conducción segura y eficiente.</p>
+        <button class="btn-info" onclick="openMaps()">📍 Abrir mapa</button>
+        <button id="btn-servicios" class="btn-info" onclick="toggleInfoInterna('servicios', this)">🚖 Nuestros Servicios</button>
+        <button id="btn-ayuda" class="btn-info" onclick="toggleInfoInterna('ayuda', this)">❓ ¿Cómo usar la página?</button>
 
-<button class="btn-info" onclick="openMaps()">📍 Abrir mapa</button>
+        <div id="servicios" class="desplegable-info">
+            <div class="service-card">
+                <div class="service-title">🚖 Traslado de Pasajeros Urbano</div>
+                <div class="service-text">
+                    Ofrecemos un servicio premium de movilidad urbana en modernas unidades eléctricas. Nos especializamos <strong>estrictamente en recorridos dentro de la ciudad</strong>.
+                </div>
+            </div>
 
-<button id="btn-servicios" class="btn-info" onclick="toggleInfoInterna('servicios', this)">🚖 Nuestros Servicios</button>
+            <div class="service-card">
+                <div class="service-title">📦 Traslado de Cargas y Mudanzas</div>
+                <div class="service-text">
+                    La solución logística para el transporte físico de sus pertenencias, compras de volumen y pequeñas mudanzas.
+                </div>
+            </div>
 
-<button id="btn-ayuda" class="btn-info" onclick="toggleInfoInterna('ayuda', this)">❓ ¿Cómo usar la página?</button>
+            <div class="service-card">
+                <div class="service-title">🛠 Asistencia de Remolque Eléctrico</div>
+                <div class="service-text">
+                    Servicio especializado de enganche y remolque para mototaxis u otros vehículos pequeños inoperativos.
+                </div>
+            </div>
+        </div>
 
-<div id="servicios" class="desplegable-info">
-<div class="service-card">
-<div class="service-title">🚖 Traslado de Pasajeros Urbano</div>
-<div class="service-text">
-Ofrecemos un servicio premium de movilidad urbana en modernas unidades eléctricas, diseñado para quienes buscan optimizar su tiempo con total comodidad. Nos especializamos <strong>estrictamente en recorridos dentro de la ciudad</strong>, garantizando traslados rápidos, seguros y puntuales hacia sus destinos cotidianos. Disfrute de un viaje silencioso, eco-amigable y con choferes altamente experimentados.
-</div>
-</div>
+        <div id="ayuda" class="desplegable-info">
+            <div class="service-card">
+                <div class="service-title"><span class="step-number">1</span> Complete el formulario</div>
+                <div class="service-text">Vaya al bloque de "Reserva" en la pantalla principal y rellene sus datos de viaje.</div>
+            </div>
+            <div class="service-card">
+                <div class="service-title"><span class="step-number">2</span> Elija su método de envío</div>
+                <div class="service-text">Presione el botón rojo de <strong>WhatsApp</strong> o el botón blanco de <strong>SMS</strong>.</div>
+            </div>
+            <div class="service-card">
+                <div class="service-title"><span class="step-number">3</span> Envíe el mensaje</div>
+                <div class="service-text">La web abrirá su aplicación con el texto redactado. Solo presione <strong>enviar</strong>.</div>
+            </div>
+        </div>
+    </nav>
 
-<div class="service-card">
-<div class="service-title">📦 Traslado de Cargas, Compras y Mudanzas</div>
-<div class="service-text">
-La solución logística integral para el transporte físico de sus pertenencias. Nos especializamos en la movilización segura de sus compras de volumen, abastecimiento de mercancías para negocios y pequeñas o medianas mudanzas residenciales. Nuestro enfoque está centrado en la estiba responsable y el cuidado estricto de sus objetos. <em>Nota: Este servicio está diseñado para carga y mudanzas, por lo que no operamos como agencia de mensjareía ligera.</em>
-</div>
-</div>
+    <div class="container">
 
-<div class="service-card">
-<div class="service-title">🛠 Asistencia de Remolque Eléctrico</div>
-<div class="service-text">
-Un respaldo confiable en la vía cuando más lo necesita. Brindamos un servicio especializado de enganche y remolque para mototaxis u otros vehículos eléctricos pequeños que hayan quedado inoperativos por fallas mecánicas o descarga de batería. <em>Nota: Este servicio comprende únicamente el transporte seguro del vehículo; no incluye herramientas ni reparaciones en el sitio.</em>
-</div>
-</div>
-</div>
+        <button id="btnInstalar" onclick="instalarApp()">📲 Instalar Aplicación Móvil</button>
 
-<div id="ayuda" class="desplegable-info">
-<div class="service-card">
-<div class="service-title"><span class="step-number">1</span> Complete el formulario</div>
-<div class="service-text">
-Vaya al bloque de "Reserva" que ve en la pantalla principal y rellene sus datos, lugar de recogida, destino y cantidad de pasajeros.
-</div>
-</div>
+        <section class="card">
+            <h2>Reserva</h2>
 
-<div class="service-card">
-<div class="service-title"><span class="step-number">2</span> Elija su método de envío</div>
-<div class="service-text">
-Presione el botón rojo de <strong>WhatsApp</strong> o el botón blanco de <strong>SMS</strong>. El sistema recopilará automáticamente toda su información.
-</div>
-</div>
+            <label id="lbl-nombre" for="nombre" class="sr-only">Nombre</label>
+            <input id="nombre" type="text" autocomplete="name" placeholder="Nombre">
 
-<div class="service-card">
-<div class="service-title"><span class="step-number">3</span> Envíe el mensaje</div>
-<div class="service-text">
-La web abrirá su aplicación con el texto ya redactado. Solo presione <strong>enviar</strong> en su teléfono y nuestro equipo le confirmará la solicitud de inmediato.
-</div>
-</div>
-</div>
-</div>
-</div>
+            <label id="lbl-tel" for="tel" class="sr-only">Teléfono</label>
+            <input id="tel" type="tel" autocomplete="tel" placeholder="Teléfono">
 
-<div class="card">
-<h2>Reserva</h2>
+            <label id="lbl-origen" for="origen" class="sr-only">Recogida</label>
+            <input id="origen" type="text" placeholder="Recogida">
 
-<label id="lbl-nombre" for="nombre" class="sr-only" style="display:none;">Nombre</label>
-<input id="nombre" type="text" autocomplete="name" placeholder="Nombre">
+            <label id="lbl-destino" for="destino" class="sr-only">Destino</label>
+            <input id="destino" type="text" placeholder="Destino">
 
-<label id="lbl-tel" for="tel" class="sr-only" style="display:none;">Teléfono</label>
-<input id="tel" type="tel" autocomplete="tel" placeholder="Teléfono">
+            <label for="pas">Cantidad de pasajeros</label>
+            <select id="pas">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+            </select>
 
-<label id="lbl-origen" for="origen" class="sr-only" style="display:none;">Recogida</label>
-<input id="origen" placeholder="Recogida">
+            <label for="pago">Método de pago</label>
+            <select id="pago">
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia">Transferencia</option>
+            </select>
 
-<label id="lbl-destino" for="destino" class="sr-only" style="display:none;">Destino</label>
-<input id="destino" placeholder="Destino">
+            <label id="lbl-obs" for="obs" class="sr-only">Observaciones</label>
+            <textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
 
-<label for="pas">Cantidad de pasajeros</label>
-<select id="pas">
-<option>1</option>
-<option>2</option>
-<option>3</option>
-<option>4</option>
-<option>5</option>
-<option>6</option>
-</select>
+            <button onclick="enviarWhatsApp()">Reservar por WhatsApp</button>
+            <a href="#" id="btnSms" class="btn">Reservar por SMS</a>
+            <a class="btn btn-call" href="tel:+5354632153">Llamar ahora</a>
+        </section>
 
-<label for="pago">Método de pago</label>
-<select id="pago">
-<option>Efectivo</option>
-<option>Transferencia</option>
-</select>
-
-<label id="lbl-obs" for="obs" class="sr-only" style="display:none;">Observaciones</label>
-<textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
-
-<button onclick="enviarWhatsApp()">Reservar por WhatsApp</button>
-<a href="#" id="btnSms" class="btn">Reservar por SMS</a>
-<a class="btn btn-call" href="tel:+5354632153">Llamar ahora</a>
-
-</div>
-
-</div>
+    </div>
 
 <script>
-
-/* 📳 vibración táctil móvil */
-function vibrar(){
-if(navigator.vibrate){
-navigator.vibrate(80);
-}
-}
-
-document.addEventListener("click",(e)=>{
-if(e.target.tagName === "BUTTON" || e.target.classList.contains("btn") || e.target.classList.contains("menu-trigger")){
-vibrar();
-}
-});
-
-/* MAPA GOOGLE */
-function openMaps(){
-if(navigator.geolocation){
-navigator.geolocation.getCurrentPosition(pos=>{
-const lat=pos.coords.latitude;
-const lng=pos.coords.longitude;
-window.open(`https://maps.google.com/?q=${lat},${lng}`,"_blank");
-}, ()=>{
-window.open("https://maps.google.com/","_blank");
-});
-}else{
-window.open("https://maps.google.com/","_blank");
-}
-}
-
-/* CONTROL DEL MENÚ DE CABECERA */
-function toggleMenu() {
-const menu = document.getElementById("menuContent");
-if (menu.style.display === "block") {
-menu.style.display = "none";
-} else {
-menu.style.display = "block";
-}
-}
-
-/* CONTROL DE LOS SUBPANELES E INDICADORES DE BOTONES */
-function toggleInfoInterna(id, elementoBoton) {
-const target = document.getElementById(id);
-const esVisible = target.style.display === "block";
-
-document.querySelectorAll('.desplegable-info').forEach(el => el.style.display = 'none');
-document.querySelectorAll('.menu-content .btn-info').forEach(btn => btn.classList.remove('active'));
-
-if (!esVisible) {
-target.style.display = "block";
-elementoBoton.classList.add('active');
-}
-}
-
-/* MENSAJE AUTOMÁTICO DE RESERVA */
-function mensaje(){
-const g=id=>document.getElementById(id).value.trim();
-
-const nombre=g("nombre");
-const tel=g("tel");
-const origen=g("origen");
-const destino=g("destino");
-const pas=g("pas");
-const pago=g("pago");
-const obs=g("obs");
-
-if(!nombre||!tel||!origen||!destino||!pas||!pago){
-alert("Completa todos los campos obligatorios");
-return null;
-}
-
-return `🚖 NUEVA RESERVA
-
-👤 Nombre: ${nombre}
-📞 Teléfono: ${tel}
-📍 Recogida: ${origen}
-🏁 Destino: ${destino}
-👥 Pasajeros: ${pas}
-💳 Método de pago: ${pago}
-📝 Observaciones: ${obs||"Ninguna"}`;
-}
-
-/* COMPARTIR POR WHATSAPP */
-function enviarWhatsApp(){
-const m=mensaje();
-if(m){
-window.open("https://wa.me/5354632153?text="+encodeURIComponent(m));
-}
-}
-
-/* COMPARTIR POR SMS */
-function enviarSMS(e){
-if(e) e.preventDefault();
-const m=mensaje();
-if(m){
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-const separador = isIOS ? ';' : '?';
-location.href="sms:+5354632153" + separador + "body=" + encodeURIComponent(m);
-}
-}
-
-// Vinculación limpia del evento SMS
-document.getElementById('btnSms').addEventListener('click', enviarSMS);
-
-/* ===================================================
-   🚀 SISTEMA AUTOMÁTICO DE INSTALACIÓN PWA
-   =================================================== */
-
-let eventoInstalacion;
-const btnInstalar = document.getElementById('btnInstalar');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault(); 
-  eventoInstalacion = e; 
-  btnInstalar.style.display = 'block'; 
-});
-
-function instalarApp() {
-  if (!eventoInstalacion) return;
-  btnInstalar.style.display = 'none'; 
-  eventoInstalacion.prompt(); 
-  eventoInstalacion.userChoice.then((choiceResult) => {
-    if (choiceResult.outcome === 'accepted') {
-      console.log('El usuario aceptó instalar Triciclos L&L');
+    /* 📳 Vibración táctil móvil */
+    function vibrar() {
+        if (navigator.vibrate) {
+            navigator.vibrate(80);
+        }
     }
-    eventoInstalacion = null;
-  });
-}
 
-window.addEventListener('appinstalled', () => {
-  btnInstalar.style.display = 'none';
-  eventoInstalacion = null;
-});
+    document.addEventListener("click", (e) => {
+        if (e.target.tagName === "BUTTON" || e.target.classList.contains("btn") || e.target.classList.contains("menu-trigger")) {
+            vibrar();
+        }
+    });
 
-// REGISTRO DEL SERVICE WORKER VIRTUAL
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    const swCode = `
-      self.addEventListener('install', e => self.skipWaiting());
-      self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-      self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => {})));
-    `;
-    const blob = new Blob([swCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl).catch(err => console.log("SW Error:", err));
-  });
-}
+    /* MAPA GOOGLE */
+    function openMaps() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                window.open(`https://maps.google.com/?q=${lat},${lng}`, "_blank");
+            }, () => {
+                window.open("https://maps.google.com/", "_blank");
+            });
+        } else {
+            window.open("https://maps.google.com/", "_blank");
+        }
+    }
+
+    /* 🔄 CONTROL DEL MENÚ DESPLEGABLE LATERAL (CON SISTEMA DE RETORNO NATIVO) */
+    function toggleMenu() {
+        const menu = document.getElementById("menuContent");
+        const overlay = document.getElementById("menuOverlay");
+        const btn = document.getElementById("menuBtn");
+
+        if (menu.classList.contains("open")) {
+            // Acción Volver atrás / Cerrar panel
+            menu.classList.remove("open");
+            overlay.classList.remove("show");
+            document.body.classList.remove("menu-abierto");
+            setTimeout(() => overlay.style.display = "none", 300);
+            
+            btn.innerHTML = "☰";
+            btn.classList.remove("active");
+            btn.setAttribute("aria-label", "Abrir información");
+
+            // Quitar el hash virtual del historial si se cierra de forma manual
+            if (location.hash === "#info") {
+                history.replaceState(null, document.title, window.location.pathname + window.location.search);
+            }
+        } else {
+            // Acción Abrir Menú
+            overlay.style.display = "block";
+            setTimeout(() => overlay.classList.add("show"), 10);
+            menu.classList.add("open");
+            document.body.classList.add("menu-abierto");
+            
+            btn.innerHTML = "←";
+            btn.classList.add("active");
+            btn.setAttribute("aria-label", "Volver atrás");
+
+            // Crear una entrada en el historial para soportar el botón "Atrás" de Android
+            location.hash = "info";
+        }
+    }
+
+    // Escuchar el evento popstate para cerrar el menú si el usuario pulsa el botón físico de retroceso del teléfono
+    window.addEventListener("popstate", () => {
+        const menu = document.getElementById("menuContent");
+        if (menu.classList.contains("open") && location.hash !== "#info") {
+            toggleMenu();
+        }
+    });
+
+    /* CONTROL DE LOS SUBPANELES E INDICADORES DE BOTONES */
+    function toggleInfoInterna(id, elementoBoton) {
+        const target = document.getElementById(id);
+        const esVisible = target.style.display === "block";
+
+        document.querySelectorAll('.desplegable-info').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.menu-content .btn-info').forEach(btn => btn.classList.remove('active'));
+
+        if (!esVisible) {
+            target.style.display = "block";
+            elementoBoton.classList.add('active');
+        }
+    }
+
+    /* MENSAJE AUTOMÁTICO DE RESERVA */
+    function mensaje() {
+        const g = id => document.getElementById(id).value.trim();
+
+        const nombre = g("nombre");
+        const tel = g("tel");
+        const origen = g("origen");
+        const destino = g("destino");
+        const pas = g("pas");
+        const pago = g("pago");
+        const obs = g("obs");
+
+        if (!nombre || !tel || !origen || !destino || !pas || !pago) {
+            alert("Completa todos los campos obligatorios");
+            return null;
+        }
+
+        return `🚖 NUEVA RESERVA\n\n👤 Nombre: ${nombre}\n📞 Teléfono: ${tel}\n📍 Recogida: ${origen}\n🏁 Destino: ${destino}\n👥 Pasajeros: ${pas}\n💳 Método de pago: ${pago}\n📝 Observaciones: ${obs || "Ninguna"}`;
+    }
+
+    /* COMPARTIR POR WHATSAPP */
+    function enviarWhatsApp() {
+        const m = mensaje();
+        if (m) {
+            window.open("https://wa.me/5354632153?text=" + encodeURIComponent(m), "_blank");
+        }
+    }
+
+    /* COMPARTIR POR SMS */
+    function enviarSMS(e) {
+        if (e) e.preventDefault();
+        const m = mensaje();
+        if (m) {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const separador = isIOS ? ';' : '?';
+            location.href = "sms:+5354632153" + separador + "body=" + encodeURIComponent(m);
+        }
+    }
+
+    document.getElementById('btnSms').addEventListener('click', enviarSMS);
+
+    /* SISTEMA DE INSTALACIÓN PWA */
+    let eventoInstalacion;
+    const btnInstalar = document.getElementById('btnInstalar');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault(); 
+        eventoInstalacion = e; 
+        btnInstalar.style.display = 'block'; 
+    });
+
+    function instalarApp() {
+        if (!eventoInstalacion) return;
+        btnInstalar.style.display = 'none'; 
+        eventoInstalacion.prompt(); 
+        eventoInstalacion.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('El usuario aceptó instalar Triciclos L&L');
+            }
+            eventoInstalacion = null;
+        });
+    }
+
+    window.addEventListener('appinstalled', () => {
+        btnInstalar.style.display = 'none';
+        eventoInstalacion = null;
+    });
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            const swCode = `
+                self.addEventListener('install', e => self.skipWaiting());
+                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+                self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => {})));
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(err => console.log("SW Error:", err));
+        });
+    }
 </script>
-
 </body>
 </html>
