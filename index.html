@@ -3,104 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Dirección Híbrido</title>
+    <title>Triciclos L&L Pro</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#E63946">
+    <meta name="apple-mobile-web-app-title" content="Triciclos L&L">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/97c42016ba31bcfc5f6aa4216a2270646f110d68/6%20sin%20t%C3%ADtulo_20260702094854.jpg">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <style>
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --r: #E63946;
+            --g: #25D366; 
+            --bg: #F3F6FA;
+            --card: #fff;
+            --text: #1F2937;
+            --border: #E5E7EB;
         }
 
         body {
-            background-color: #f4f7f6;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        body.menu-abierto, body.mapa-abierto, body.modal-abierto {
+            overflow: hidden;
+        }
+
+        header {
+            position: relative;
+        }
+
+        header img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            border-radius: 0 0 28px 28px;
+            display: block;
+        }
+
+        .menu-trigger {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 1001;
+            background: var(--r);
+            color: #fff;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,.3);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s;
         }
 
-        .form-container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        .menu-trigger.active {
+            background: #111827;
+            transform: scale(1.05);
+        }
+
+        .slogan {
+            background: #fff;
+            padding: 14px;
+            text-align: center;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+            padding: 14px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 18px;
+            border-radius: 18px;
+            margin: 14px 0;
+            border: 1px solid var(--border);
+            box-shadow: 0 6px 18px rgba(0,0,0,.06);
+        }
+
+        .card-intro {
+            font-size: 14px;
+            color: #4B5563;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .menu-content {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 85%;
+            max-width: 400px;
+            height: 100%;
+            background: #fff;
+            z-index: 1000;
+            box-shadow: -6px 0 24px rgba(0,0,0,.15);
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 80px 20px 20px 20px;
+            overflow-y: auto;
+        }
+
+        .menu-content.open {
+            right: 0;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 450px;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        h2 {
-            margin-top: 0;
-            color: #333;
-            font-size: 20px;
-            margin-bottom: 20px;
+        .menu-overlay.show {
+            display: block;
+            opacity: 1;
         }
 
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
+        button, .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 10px;
+            transition: .2s;
+            box-shadow: 0 6px 14px rgba(0,0,0,.15);
+            text-decoration: none;
+            border: none;
+        }
+
+        button { background: var(--r); color: #fff; }
+        .btn { background: var(--r); color: #fff; }
+        .btn-call { background: var(--g); color: #fff; }
+
+        .menu-content .btn-info {
+            background: #fff;
+            color: #111827;
+            border: 1px solid #D1D5DB;
+            box-shadow: 0 4px 10px rgba(0,0,0,.08);
+        }
+
+        .menu-content .btn-info.active {
+            background: var(--r) !important;
+            color: #fff !important;
+            border-color: var(--r) !important;
+        }
+
+        button:active, .btn:active, .menu-trigger:active {
+            transform: scale(.96);
+            filter: brightness(.95);
+        }
+
+        .desplegable-info {
+            display: none;
+            animation: fade .3s ease;
+            margin-top: 12px;
+        }
+
+        @keyframes fade {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .service-card {
+            background: #F9FAFB;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid #E5E7EB;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,.02);
+        }
+
+        .service-title {
+            font-weight: 800;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .service-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #374151;
+        }
+
+        .step-number {
+            background: var(--r);
+            color: #fff;
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 22px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 6px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 13px;
+            margin: 7px 0;
+            border-radius: 12px;
+            border: 1px solid #D1D5DB;
+            font-size: 16px;
+        }
+
+        input[readonly] {
+            background-color: #F9FAFB;
+            cursor: pointer;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            color: #666;
-            font-weight: 600;
-            font-size: 14px;
+            margin-top: 10px;
+            font-weight: 700;
         }
 
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 45px 12px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus {
-            border-color: #3b82f6;
-        }
-
-        /* Icono del mapa dentro del input */
-        .map-icon-btn {
+        .sr-only {
             position: absolute;
-            right: 12px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 18px;
+            width: 1px;
+            height: 1px;
             padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #3b82f6;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
         }
 
-        button.btn-submit {
-            width: 100%;
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
+        #btnInstalar {
+            display: none;
+            background: #111827;
+            color: #fff;
+            margin-bottom: 14px;
         }
 
-        button.btn-submit:hover {
-            background-color: #2563eb;
-        }
-
-        /* --- ESTILOS DEL MODAL (MENÚ DE OPCIONES) --- */
+        /* --- ESTILOS DE LOS MODALES DE OPCIÓN --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -110,11 +277,11 @@
             background: rgba(0,0,0,0.4);
             display: flex;
             justify-content: center;
-            align-items: flex-end; /* En móviles sube desde abajo */
+            align-items: flex-end;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
-            z-index: 1000;
+            z-index: 1500;
         }
 
         .modal-overlay.active {
@@ -138,7 +305,7 @@
 
         @media (min-width: 500px) {
             .modal-overlay {
-                align-items: center; /* En escritorio se centra */
+                align-items: center;
             }
             .modal-content {
                 border-radius: 12px;
@@ -146,11 +313,11 @@
         }
 
         .modal-title {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             text-align: center;
-            color: #1e293b;
+            color: #111827;
         }
 
         .option-btn {
@@ -158,22 +325,24 @@
             align-items: center;
             width: 100%;
             padding: 14px;
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
+            background: #F9FAFB;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
             margin-bottom: 12px;
             cursor: pointer;
             text-align: left;
             font-size: 15px;
-            font-weight: 500;
-            color: #334155;
+            font-weight: bold;
+            color: #374151;
             transition: all 0.2s;
+            box-shadow: none;
         }
 
-        .option-btn:hover {
-            background: #eff6ff;
-            border-color: #3b82f6;
-            color: #1d4ed8;
+        .option-btn:hover, .option-btn:active {
+            background: #FEF2F2;
+            border-color: var(--r);
+            color: var(--r);
+            transform: none;
         }
 
         .option-btn span {
@@ -185,105 +354,515 @@
             width: 100%;
             background: transparent;
             border: none;
-            color: #64748b;
+            color: #6B7280;
             padding: 8px;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 700;
+            box-shadow: none;
+        }
+
+        /* 🗺️ INTERFAZ DEL MAPA SELECTOR FULLSCREEN */
+        .map-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .map-header {
+            padding: 12px;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 2002;
+            display: flex;
+            gap: 8px;
+        }
+
+        #map-container {
+            flex-grow: 1;
+            width: 100%;
+            position: relative;
+        }
+
+        .map-center-marker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -100%);
+            z-index: 2001;
+            pointer-events: none;
+            font-size: 32px;
+        }
+
+        .map-footer {
+            padding: 14px;
+            background: #fff;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 2002;
+        }
+
+        .address-preview {
+            font-size: 14px;
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 10px;
+            text-align: center;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
+
 <body>
 
-    <div class="form-container">
-        <h2>Datos de Envío</h2>
-        
-        <div class="input-group">
-            <label for="direccion">Dirección de entrega</label>
-            <div class="input-wrapper">
-                <input 
-                    type="text" 
-                    id="direccion" 
-                    placeholder="Toca para añadir tu dirección..." 
-                    readonly
-                >
-                <!-- Botón de mapa integrado -->
-                <button type="button" class="map-icon-btn" id="mapIconBtn" title="Seleccionar en mapa">📍</button>
+    <header>
+        <button id="menuBtn" class="menu-trigger" onclick="toggleMenu()" aria-label="Abrir información">☰</button>
+        <img src="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/97c42016ba31bcfc5f6aa4216a2270646f110d68/6%20sin%20t%C3%ADtulo_20260702094854.jpg" loading="lazy" alt="Banner Triciclos L&L">
+    </header>
+
+    <div class="slogan">Tu destino, nuestro compromiso</div>
+
+    <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+
+    <nav id="menuContent" class="menu-content" aria-label="Menú secundario">
+        <p class="card-intro">En Triciclos L&L contamos con un equipo de choferes profesionales altamente experimentados y comprometidos con brindarle una conducción segura y eficiente.</p>
+
+        <button class="btn-info" onclick="openMapsUniversal()">📍 Abrir mapa base</button>
+        <button id="btn-servicios" class="btn-info" onclick="toggleInfoInterna('servicios', this)">🚖 Nuestros Servicios</button>
+        <button id="btn-ayuda" class="btn-info" onclick="toggleInfoInterna('ayuda', this)">❓ ¿Cómo usar la página?</button>
+
+        <div id="servicios" class="desplegable-info">
+            <div class="service-card">
+                <div class="service-title">🚖 Traslado de Pasajeros Urbano</div>
+                <div class="service-text">
+                    Ofrecemos un servicio premium de movilidad urbana en modernas unidades eléctricas. Nos especializamos <strong>estrictamente en recorridos dentro de la ciudad</strong>.
+                </div>
+            </div>
+            <div class="service-card">
+                <div class="service-title">📦 Traslado de Cargas y Mudanzas</div>
+                <div class="service-text">
+                    La solución logística para el transporte físico de sus pertenencias, compras de volumen y pequeñas mudanzas.
+                </div>
+            </div>
+            <div class="service-card">
+                <div class="service-title">🛠 Asistencia de Remolque Eléctrico</div>
+                <div class="service-text">
+                    Servicio especializado de enganche y remolque para mototaxis u otros vehículos pequeños inoperativos.
+                </div>
             </div>
         </div>
 
-        <button class="btn-submit">Confirmar Pedido</button>
-    </div>
+        <div id="ayuda" class="desplegable-info">
+            <div class="service-card">
+                <div class="service-title"><span class="step-number">1</span> Complete el formulario</div>
+                <div class="service-text">Vaya al bloque de "Reserva" en la pantalla principal y rellene sus datos de viaje.</div>
+            </div>
+            <div class="service-card">
+                <div class="service-title"><span class="step-number">2</span> Elija su método de envío</div>
+                <div class="service-text">Presione el botón rojo de <strong>WhatsApp</strong> o el botón blanco de <strong>SMS</strong>.</div>
+            </div>
+            <div class="service-card">
+                <div class="service-title"><span class="step-number">3</span> Envíe el mensaje</div>
+                <div class="service-text">La web abrirá su aplicación con el texto redactado. Solo presione <strong>enviar</strong>.</div>
+            </div>
+        </div>
+    </nav>
 
-    <!-- MODAL DE OPCIONES -->
-    <div class="modal-overlay" id="modalOpciones">
+    <main class="container">
+
+        <button id="btnInstalar" onclick="instalarApp()">📲 Instalar Aplicación Móvil</button>
+
+        <section class="card">
+            <h2>Reserva</h2>
+
+            <label id="lbl-nombre" for="nombre" class="sr-only">Nombre</label>
+            <input id="nombre" type="text" autocomplete="name" placeholder="Nombre">
+
+            <label id="lbl-tel" for="tel" class="sr-only">Teléfono</label>
+            <input id="tel" type="tel" autocomplete="tel" placeholder="Teléfono">
+
+            <label id="lbl-origen" for="origen" class="sr-only">Recogida</label>
+            <input id="origen" type="text" placeholder="📍 Dirección de Recogida" readonly onclick="solicitarMetodoDireccion('origen')">
+
+            <label id="lbl-destino" for="destino" class="sr-only">Destino</label>
+            <input id="destino" type="text" placeholder="🏁 Dirección de Destino" readonly onclick="solicitarMetodoDireccion('destino')">
+
+            <label for="pas">Cantidad de pasajeros</label>
+            <select id="pas">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+            </select>
+
+            <label for="pago">Método de pago</label>
+            <select id="pago">
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia">Transferencia</option>
+            </select>
+
+            <label id="lbl-obs" for="obs" class="sr-only">Observaciones</label>
+            <textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
+
+            <button onclick="enviarWhatsApp()">Reservar por WhatsApp</button>
+            <button id="btnSms" type="button" style="background:#fff; color:#111827; border: 1px solid #D1D5DB; font-weight:700; width:100%; padding:16px; margin-top:10px; border-radius:999px; box-shadow:0 6px 14px rgba(0,0,0,.15); cursor:pointer;">Reservar por SMS</button>
+            <a class="btn btn-call" href="tel:+5354632153">Llamar ahora</a>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="modalOpcionesDireccion">
         <div class="modal-content">
-            <div class="modal-title">¿Cómo deseas añadir tu dirección?</div>
+            <div class="modal-title" id="modalOpcionesTitulo">¿Cómo deseas añadir la dirección?</div>
             
-            <button class="option-btn" id="btnOpcionMapa">
+            <button class="option-btn" onclick="ejecutarOpcionSeleccionada('mapa')">
                 <span>🗺️</span> Seleccionar ubicación en el mapa
             </button>
             
-            <button class="option-btn" id="btnOpcionManual">
+            <button class="option-btn" onclick="ejecutarOpcionSeleccionada('manual')">
                 <span>✍️</span> Escribir dirección manualmente
             </button>
 
-            <button class="close-modal" id="btnCerrarModal">Cancelar</button>
+            <button class="close-modal" onclick="cerrarModalOpciones()">Cancelar</button>
         </div>
     </div>
 
-    <script>
-        const inputDireccion = document.getElementById('direccion');
-        const mapIconBtn = document.getElementById('mapIconBtn');
-        const modal = document.getElementById('modalOpciones');
-        const btnCerrarModal = document.getElementById('btnCerrarModal');
-        const btnOpcionMapa = document.getElementById('btnOpcionMapa');
-        const btnOpcionManual = document.getElementById('btnOpcionManual');
+    <div id="mapModal" class="map-modal" role="dialog" aria-hidden="true">
+        <div class="map-header">
+            <input id="mapSearch" type="text" placeholder="🔍 Escribe una dirección manual..." style="margin:0;">
+            <button onclick="buscarDireccionManual()" style="width:auto; padding:0 18px; margin:0; background:#111827;">Buscar</button>
+        </div>
+        <div id="map-container">
+            <div class="map-center-marker">📍</div>
+        </div>
+        <div class="map-footer">
+            <div id="addressPreview" class="address-preview">Mueve el mapa para ubicar la dirección...</div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="cerrarSelectorMapa()" style="background:#6B7280; margin:0;">Cancelar</button>
+                <button onclick="confirmarDireccion()" style="background:#25D366; margin:0;">Confirmar</button>
+            </div>
+        </div>
+    </div>
 
-        // Función para abrir el modal
-        function abrirModal() {
-            modal.classList.add('active');
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let map, mapMarkerTargetInput = '';
+    let currentAddressString = '';
+
+    const DEFAULT_LAT = 23.1136;
+    const DEFAULT_LNG = -82.3666;
+
+    // --- MANEJO DEL MODAL INTERMEDIO ---
+    function solicitarMetodoDireccion(inputId) {
+        // Si el usuario ya cargó texto y quiere editarlo directamente dentro del input principal
+        const inputDestino = document.getElementById(inputId);
+        if (!inputDestino.hasAttribute('readonly')) return;
+
+        mapMarkerTargetInput = inputId;
+        const modal = document.getElementById('modalOpcionesDireccion');
+        const titulo = document.getElementById('modalOpcionesTitulo');
+        
+        titulo.innerText = inputId === 'origen' ? '¿Cómo deseas añadir el Lugar de Recogida?' : '¿Cómo deseas añadir el Destino?';
+        
+        modal.classList.add('active');
+        document.body.classList.add('modal-abierto');
+    }
+
+    function cerrarModalOpciones() {
+        document.getElementById('modalOpcionesDireccion').classList.remove('active');
+        document.body.classList.remove('modal-abierto');
+    }
+
+    function ejecutarOpcionSeleccionada(tipo) {
+        cerrarModalOpciones();
+        if (tipo === 'manual') {
+            activarInputEdicionDirecta(mapMarkerTargetInput);
+        } else if (tipo === 'mapa') {
+            abrirSelectorMapa(mapMarkerTargetInput);
         }
+    }
 
-        // Función para cerrar el modal
-        function cerrarModal() {
-            modal.classList.remove('active');
+    function activarInputEdicionDirecta(inputId) {
+        const input = document.getElementById(inputId);
+        input.removeAttribute('readonly');
+        input.focus();
+    }
+
+
+    // --- LÓGICA DE MAPAS Y LOCALIZACIÓN ---
+    function initMap() {
+        if (!map) {
+            map = L.map('map-container').setView([DEFAULT_LAT, DEFAULT_LNG], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            map.on('moveend', () => {
+                const center = map.getCenter();
+                obtenerNombreCalle(center.lat, center.lng);
+            });
         }
+    }
 
-        // Al tocar el input (si está vacío) o el icono del mapa, abrimos las opciones
-        inputDireccion.addEventListener('click', () => {
-            if (inputDireccion.hasAttribute('readonly')) {
-                abrirModal();
+    function obtenerUbicacionActual() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject(new Error("Geolocalización no soportada"));
+            } else {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    timeout: 6000,
+                    maximumAge: 0
+                });
             }
         });
+    }
 
-        mapIconBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Evita conflictos de clicks
-            abrirModal();
-        });
+    async function abrirSelectorMapa(inputId) {
+        mapMarkerTargetInput = inputId;
+        const modal = document.getElementById('mapModal');
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('mapa-abierto');
+        
+        initMap();
+        
+        document.getElementById('addressPreview').innerText = "Localizando posición...";
 
-        btnCerrarModal.addEventListener('click', cerrarModal);
+        try {
+            const pos = await obtenerUbicacionActual();
+            map.setView([pos.coords.latitude, pos.coords.longitude], 17);
+        } catch (error) {
+            map.setView([DEFAULT_LAT, DEFAULT_LNG], 16);
+            obtenerNombreCalle(DEFAULT_LAT, DEFAULT_LNG);
+        }
+        
+        setTimeout(() => {
+            if(map) map.invalidateSize();
+        }, 200);
+    }
 
-        // OPCIÓN 1: Selección en Mapa (Simulación)
-        btnOpcionMapa.addEventListener('click', () => {
-            cerrarModal();
-            alert("Aquí se abriría tu mapa (Google Maps / Leaflet). Simulemos que el usuario movió el pin y seleccionó una ubicación.");
-            
-            // Inyectamos la dirección obtenida del mapa
-            inputDireccion.value = "Av. de la Constitución 145, Piso 3B";
-            
-            // ¡LA CLAVE! Hacemos que el campo sea editable a mano por si quiere corregir algo
-            inputDireccion.removeAttribute('readonly');
-            inputDireccion.focus();
-        });
+    function cerrarSelectorMapa() {
+        const modal = document.getElementById('mapModal');
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('mapa-abierto');
+        document.getElementById('mapSearch').value = '';
+    }
 
-        // OPCIÓN 2: Escribir a mano directamente
-        btnOpcionManual.addEventListener('click', () => {
-            cerrarModal();
-            // Quitamos el bloqueado para que pueda escribir
-            inputDireccion.removeAttribute('readonly');
-            inputDireccion.focus();
-        });
-    </script>
+    async function obtenerNombreCalle(lat, lng) {
+        const preview = document.getElementById('addressPreview');
+        preview.innerText = "Calculando entrecalles...";
 
+        const fetchOptions = {
+            headers: {
+                'User-Agent': 'TriciclosLyLPro/1.0 (contacto: admin@tricicloslyl.com)'
+            }
+        };
+
+        try {
+            const resPrincipal = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, fetchOptions);
+            const dataPrincipal = await resPrincipal.json();
+
+            if (!dataPrincipal || !dataPrincipal.address) {
+                preview.innerText = "Punto seleccionado en el mapa.";
+                currentAddressString = `Coordenadas: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                return;
+            }
+
+            const adr = dataPrincipal.address;
+            const callePrincipal = adr.road || adr.pedestrian || adr.path || '';
+            const barrio = adr.suburb || adr.neighbourhood || '';
+            const ciudad = adr.city || adr.town || '';
+
+            if (!callePrincipal) {
+                const segmentos = (dataPrincipal.display_name || "").split(',');
+                currentAddressString = segmentos.slice(0, 2).join(',');
+                preview.innerText = currentAddressString;
+                return;
+            }
+
+            const offset = 0.0006; 
+            const puntosBusqueda = [
+                { lat: lat + offset, lng: lng }, 
+                { lat: lat - offset, lng: lng }, 
+                { lat: lat, lng: lng + offset }, 
+                { lat: lat, lng: lng - offset }  
+            ];
+
+            const promesas = puntosBusqueda.map(p => 
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.lat}&lon=${p.lng}&zoom=18&addressdetails=1`, fetchOptions)
+                    .then(r => r.json())
+                    .catch(() => null)
+            );
+
+            const resultados = await Promise.all(promesas);
+            let entrecallesDetectadas = [];
+
+            resultados.forEach(res => {
+                if (res && res.address) {
+                    const calleCercana = res.address.road || res.address.pedestrian || '';
+                    if (calleCercana && calleCercana !== callePrincipal && !entrecallesDetectadas.includes(calleCercana)) {
+                        entrecallesDetectadas.push(calleCercana);
+                    }
+                }
+            });
+
+            let stringFinal = callePrincipal;
+
+            if (entrecallesDetectadas.length >= 2) {
+                stringFinal += ` e/ ${entrecallesDetectadas[0]} y ${entrecallesDetectadas[1]}`;
+            } else if (entrecallesDetectadas.length === 1) {
+                stringFinal += ` y esquina ${entrecallesDetectadas[0]}`;
+            } else if (barrio) {
+                stringFinal += `, ${barrio}`;
+            }
+
+            if (ciudad && !stringFinal.includes(ciudad)) {
+                stringFinal += ` (${ciudad})`;
+            }
+
+            currentAddressString = stringFinal;
+            preview.innerText = currentAddressString;
+
+        } catch (err) {
+            preview.innerText = "Error de red. Puedes confirmar e ingresar detalles a mano.";
+            currentAddressString = `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+        }
+    }
+
+    function buscarDireccionManual() {
+        const query = document.getElementById('mapSearch').value.trim();
+        if (!query) return;
+
+        document.getElementById('addressPreview').innerText = "Buscando...";
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
+            headers: { 'User-Agent': 'TriciclosLyLPro/1.0 (contacto: admin@tricicloslyl.com)' }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const target = data[0];
+                    map.setView([target.lat, target.lon], 17);
+                } else {
+                    alert("No se encontró la ubicación. Intenta ingresando una referencia más amplia.");
+                    document.getElementById('addressPreview').innerText = "Mueve el mapa para ubicar la dirección...";
+                }
+            })
+            .catch(() => {
+                alert("Error al conectar con el servidor de búsqueda.");
+            });
+    }
+
+    function confirmarDireccion() {
+        if (currentAddressString && mapMarkerTargetInput) {
+            activarInputEdicionDirecta(mapMarkerTargetInput);
+            document.getElementById(mapMarkerTargetInput).value = currentAddressString;
+        }
+        cerrarSelectorMapa();
+    }
+
+    function vibrar() {
+        if (navigator.vibrate) navigator.vibrate(80);
+    }
+
+    document.addEventListener("click", (e) => {
+        if (e.target.tagName === "BUTTON" || e.target.classList.contains("btn") || e.target.classList.contains("menu-trigger") || e.target.classList.contains("option-btn")) {
+            vibrar();
+        }
+    });
+
+    async function openMapsUniversal() {
+        try {
+            const pos = await obtenerUbicacionActual();
+            window.open(`https://www.google.com/maps/search/?api=1&query=${pos.coords.latitude},${pos.coords.longitude}`, "_blank");
+        } catch (error) {
+            window.open(`https://www.google.com/maps/search/?api=1&query=${DEFAULT_LAT},${DEFAULT_LNG}`, "_blank");
+        }
+    }
+
+    function toggleMenu() {
+        const menu = document.getElementById("menuContent");
+        const overlay = document.getElementById("menuOverlay");
+        const btn = document.getElementById("menuBtn");
+
+        if (menu.classList.contains("open")) {
+            menu.classList.remove("open");
+            overlay.classList.remove("show");
+            document.body.classList.remove("menu-abierto");
+            setTimeout(() => overlay.style.display = "none", 300);
+            btn.innerHTML = "☰";
+            btn.classList.remove("active");
+        } else {
+            overlay.style.display = "block";
+            setTimeout(() => overlay.classList.add("show"), 10);
+            menu.classList.add("open");
+            document.body.classList.add("menu-abierto");
+            btn.innerHTML = "←";
+            btn.classList.add("active");
+            location.hash = "info";
+        }
+    }
+
+    window.addEventListener("popstate", () => {
+        const menu = document.getElementById("menuContent");
+        if (menu.classList.contains("open") && location.hash !== "#info") toggleMenu();
+    });
+
+    function toggleInfoInterna(id, elementoBoton) {
+        const target = document.getElementById(id);
+        const esVisible = target.style.display === "block";
+        document.querySelectorAll('.desplegable-info').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.menu-content .btn-info').forEach(btn => btn.classList.remove('active'));
+        if (!esVisible) {
+            target.style.display = "block";
+            elementoBoton.classList.add('active');
+        }
+    }
+
+    function mensaje() {
+        const g = id => document.getElementById(id).value.trim();
+        const nombre = g("nombre");
+        const tel = g("tel");
+        const origen = g("origen");
+        const destino = g("destino");
+        const pas = g("pas");
+        const pago = g("pago");
+        const obs = g("obs");
+
+        if (!nombre || !tel || !origen || !destino) {
+            alert("Completa todos los campos obligatorios incluyendo origen y destino.");
+            return null;
+        }
+        return `🚖 NUEVA RESERVA\n\n👤 Nombre: ${nombre}\n📞 Teléfono: ${tel}\n📍 Recogida: ${origen}\n🏁 Destino: ${destino}\n👥 Pasajeros: ${pas}\n💳 Método de pago: ${pago}\n📝 Observaciones: ${obs || "Ninguna"}`;
+    }
+
+    function enviarWhatsApp() {
+        const m = mensaje();
+        if (m) window.open("https://wa.me/5354632153?text=" + encodeURIComponent(m), "_blank");
+    }
+
+    function enviarSMS(e) {
+        if (e) e.preventDefault();
+        const m = mensaje();
+        if (m) {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            location.href = "sms:+5354632153" + (isIOS ? ';' : '?') + "body=" + encodeURIComponent(m);
+        }
+    }
+    document.getElementById('btnSms').addEventListener('click', enviarSMS);
+
+    let eventoInstalacion;
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); eventoInstalacion = e; document.getElementById('btnInstalar').style.display = 'block'; });
+    function instalarApp() { if(eventoInstalacion) { eventoInstalacion.prompt(); eventoInstalacion = null; } }
+</script>
 </body>
 </html>
