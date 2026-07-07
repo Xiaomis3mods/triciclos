@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Dirección Híbrido con Mapa Real</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>Formulario de Dirección Híbrido</title>
     <style>
         * {
             box-sizing: border-box;
@@ -69,6 +68,7 @@
             border-color: #3b82f6;
         }
 
+        /* Icono del mapa dentro del input */
         .map-icon-btn {
             position: absolute;
             right: 12px;
@@ -100,7 +100,7 @@
             background-color: #2563eb;
         }
 
-        /* --- ESTILOS DE LOS MODALES --- */
+        /* --- ESTILOS DEL MODAL (MENÚ DE OPCIONES) --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -110,7 +110,7 @@
             background: rgba(0,0,0,0.4);
             display: flex;
             justify-content: center;
-            align-items: flex-end;
+            align-items: flex-end; /* En móviles sube desde abajo */
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
@@ -138,7 +138,7 @@
 
         @media (min-width: 500px) {
             .modal-overlay {
-                align-items: center;
+                align-items: center; /* En escritorio se centra */
             }
             .modal-content {
                 border-radius: 12px;
@@ -190,28 +190,6 @@
             cursor: pointer;
             font-weight: 500;
         }
-
-        /* --- CONTENEDOR DEL MAPA REAL --- */
-        #map {
-            width: 100%;
-            height: 300px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 2px solid #e2e8f0;
-        }
-
-        .btn-confirm-map {
-            width: 100%;
-            background-color: #10b981;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
@@ -228,6 +206,7 @@
                     placeholder="Toca para añadir tu dirección..." 
                     readonly
                 >
+                <!-- Botón de mapa integrado -->
                 <button type="button" class="map-icon-btn" id="mapIconBtn" title="Seleccionar en mapa">📍</button>
             </div>
         </div>
@@ -235,6 +214,7 @@
         <button class="btn-submit">Confirmar Pedido</button>
     </div>
 
+    <!-- MODAL DE OPCIONES -->
     <div class="modal-overlay" id="modalOpciones">
         <div class="modal-content">
             <div class="modal-title">¿Cómo deseas añadir tu dirección?</div>
@@ -247,147 +227,63 @@
                 <span>✍️</span> Escribir dirección manualmente
             </button>
 
-            <button class="close-modal" id="btnCerrarOpciones">Cancelar</button>
+            <button class="close-modal" id="btnCerrarModal">Cancelar</button>
         </div>
     </div>
 
-    <div class="modal-overlay" id="modalMapa">
-        <div class="modal-content" style="max-width: 550px;">
-            <div class="modal-title">Mueve el mapa para situar el pin 📍</div>
-            
-            <div id="map"></div>
-            
-            <button class="btn-confirm-map" id="btnConfirmarUbicacion">Confirmar esta ubicación</button>
-            <button class="close-modal" id="btnCerrarMapa">Atrás</button>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const inputDireccion = document.getElementById('direccion');
         const mapIconBtn = document.getElementById('mapIconBtn');
-        
-        const modalOpciones = document.getElementById('modalOpciones');
-        const btnCerrarOpciones = document.getElementById('btnCerrarOpciones');
+        const modal = document.getElementById('modalOpciones');
+        const btnCerrarModal = document.getElementById('btnCerrarModal');
         const btnOpcionMapa = document.getElementById('btnOpcionMapa');
         const btnOpcionManual = document.getElementById('btnOpcionManual');
 
-        const modalMapa = document.getElementById('modalMapa');
-        const btnCerrarMapa = document.getElementById('btnCerrarMapa');
-        const btnConfirmarUbicacion = document.getElementById('btnConfirmarUbicacion');
-
-        let map;
-        let marker;
-        // Coordenadas por defecto (Madrid, España como ejemplo inicial)
-        let latActual = 40.416775;
-        let lonActual = -3.703790;
-
-        // Abrir y cerrar modales
-        function toggleModal(modal, abrir) {
-            if (abrir) modal.classList.add('active');
-            else modal.classList.remove('active');
+        // Función para abrir el modal
+        function abrirModal() {
+            modal.classList.add('active');
         }
 
-        // Eventos de apertura inicial
+        // Función para cerrar el modal
+        function cerrarModal() {
+            modal.classList.remove('active');
+        }
+
+        // Al tocar el input (si está vacío) o el icono del mapa, abrimos las opciones
         inputDireccion.addEventListener('click', () => {
-            if (inputDireccion.hasAttribute('readonly')) toggleModal(modalOpciones, true);
+            if (inputDireccion.hasAttribute('readonly')) {
+                abrirModal();
+            }
         });
 
         mapIconBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleModal(modalOpciones, true);
+            e.stopPropagation(); // Evita conflictos de clicks
+            abrirModal();
         });
 
-        btnCerrarOpciones.addEventListener('click', () => toggleModal(modalOpciones, false));
-        btnCerrarMapa.addEventListener('click', () => toggleModal(modalMapa, false));
+        btnCerrarModal.addEventListener('click', cerrarModal);
 
-        // Opción: Escribir a mano directamente
-        btnOpcionManual.addEventListener('click', () => {
-            toggleModal(modalOpciones, false);
-            activarInputEdicion();
-        });
-
-        // Opción: Abrir el mapa interactivo
+        // OPCIÓN 1: Selección en Mapa (Simulación)
         btnOpcionMapa.addEventListener('click', () => {
-            toggleModal(modalOpciones, false);
-            toggleModal(modalMapa, true);
+            cerrarModal();
+            alert("Aquí se abriría tu mapa (Google Maps / Leaflet). Simulemos que el usuario movió el pin y seleccionó una ubicación.");
             
-            // Intentar obtener la ubicación real del usuario mediante el GPS del navegador
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    latActual = position.coords.latitude;
-                    lonActual = position.coords.longitude;
-                    inicializarMapa(latActual, lonActual);
-                }, () => {
-                    // Si el usuario deniega el GPS, carga las coordenadas por defecto
-                    inicializarMapa(latActual, lonActual);
-                });
-            } else {
-                inicializarMapa(latActual, lonActual);
-            }
-        });
-
-        // Inicializar o refrescar el mapa de OpenStreetMap
-        function inicializarMapa(lat, lon) {
-            // Esperar un instante para que el modal se despliegue y Leaflet calcule bien el tamaño
-            setTimeout(() => {
-                if (!map) {
-                    map = L.map('map').setView([lat, lon], 16);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(map);
-
-                    // Pin en el centro
-                    marker = L.marker([lat, lon], { draggable: false }).addTo(map);
-
-                    // Cada vez que el mapa se mueva, el pin se queda fijo en el centro visual
-                    map.on('move', () => {
-                        const centro = map.getCenter();
-                        marker.setLatLng(centro);
-                    });
-                } else {
-                    map.setView([lat, lon], 16);
-                    marker.setLatLng([lat, lon]);
-                    map.invalidateSize(); // Corrige errores visuales de renderizado en modales ocultos
-                }
-            }, 200);
-        }
-
-        // Al confirmar ubicación en el mapa, obtener nombre de calle real (Geocoding inverso gratuito)
-        btnConfirmarUbicacion.addEventListener('click', async () => {
-            const centro = map.getCenter();
-            btnConfirmarUbicacion.innerText = "Obteniendo dirección...";
-            btnConfirmarUbicacion.disabled = true;
-
-            try {
-                // Consultamos la API pública de Nominatim (OpenStreetMap) para traducir coordenadas a texto
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${centro.lat}&lon=${centro.lng}&zoom=18&addressdetails=1`);
-                const data = await response.json();
-                
-                if (data && data.display_name) {
-                    // Limpiamos un poco el texto largo que devuelve para que entre en el formulario
-                    const partes = data.display_name.split(',');
-                    const direccionCorta = partes.slice(0, 3).join(',').trim();
-                    
-                    inputDireccion.value = direccionCorta;
-                } else {
-                    inputDireccion.value = `Lat: ${centro.lat.toFixed(5)}, Lon: ${centro.lng.toFixed(5)}`;
-                }
-            } catch (error) {
-                inputDireccion.value = `Lat: ${centro.lat.toFixed(5)}, Lon: ${centro.lng.toFixed(5)}`;
-            } finally {
-                btnConfirmarUbicacion.innerText = "Confirmar esta ubicación";
-                btnConfirmarUbicacion.disabled = false;
-                toggleModal(modalMapa, false);
-                activarInputEdicion();
-            }
-        });
-
-        // Quita el bloqueo de solo lectura y enfoca el teclado
-        function activarInputEdicion() {
+            // Inyectamos la dirección obtenida del mapa
+            inputDireccion.value = "Av. de la Constitución 145, Piso 3B";
+            
+            // ¡LA CLAVE! Hacemos que el campo sea editable a mano por si quiere corregir algo
             inputDireccion.removeAttribute('readonly');
             inputDireccion.focus();
-        }
+        });
+
+        // OPCIÓN 2: Escribir a mano directamente
+        btnOpcionManual.addEventListener('click', () => {
+            cerrarModal();
+            // Quitamos el bloqueado para que pueda escribir
+            inputDireccion.removeAttribute('readonly');
+            inputDireccion.focus();
+        });
     </script>
+
 </body>
 </html>
