@@ -333,7 +333,7 @@
 
     <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
 
-    <nav id="menuContent" class="menu-content">
+    <nav id="menuContent" class="menu-content" aria-label="Menú secundario">
         <p class="card-intro">En Triciclos L&L contamos con un equipo de choferes profesionales altamente experimentados y comprometidos con brindarle una conducción segura y eficiente.</p>
 
         <button class="btn-info" onclick="openMapsUniversal()">📍 Abrir mapa base</button>
@@ -377,7 +377,7 @@
         </div>
     </nav>
 
-    <div class="container">
+    <main class="container">
 
         <button id="btnInstalar" onclick="instalarApp()">📲 Instalar Aplicación Móvil</button>
 
@@ -416,12 +416,12 @@
             <textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
 
             <button onclick="enviarWhatsApp()">Reservar por WhatsApp</button>
-            <a href="javascript:void(0)" id="btnSms" class="btn">Reservar por SMS</a>
+            <button id="btnSms" class="btn" style="background:#fff; color:#111827; border: 1px solid #D1D5DB;">Reservar por SMS</button>
             <a class="btn btn-call" href="tel:+5354632153">Llamar ahora</a>
         </section>
-    </div>
+    </main>
 
-    <div id="mapModal" class="map-modal">
+    <div id="mapModal" class="map-modal" role="dialog" aria-hidden="true">
         <div class="map-header">
             <input id="mapSearch" type="text" placeholder="🔍 Escribe una dirección manual..." style="margin:0;">
             <button onclick="buscarDireccionManual()" style="width:auto; padding:0 18px; margin:0; background:#111827;">Buscar</button>
@@ -443,9 +443,8 @@
     /* VARIABLES GLOBALES DEL MAPA */
     let map, mapMarkerTargetInput = '';
     let currentAddressString = '';
-    let searchTimeout;
 
-    // Coordenadas por defecto (Centro de La Habana, Cuba. Cambiar si es necesario)
+    // Coordenadas por defecto (Centro de La Habana, Cuba)
     const DEFAULT_LAT = 23.1136;
     const DEFAULT_LNG = -82.3666;
 
@@ -456,7 +455,7 @@
                 attribution: '© OpenStreetMap'
             }).addTo(map);
 
-            // Escuchar el final del movimiento del mapa para hacer Geocodificación Inversa (Calles)
+            // Escuchar el final del movimiento del mapa para hacer Geocodificación Inversa
             map.on('moveend', () => {
                 const center = map.getCenter();
                 obtenerNombreCalle(center.lat, center.lng);
@@ -464,47 +463,99 @@
         }
     }
 
-    function abrirSelectorMapa(inputId) {
+    function obtenerUbicacionActual() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject(new Error("Geolocalización no soportada"));
+            } else {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                });
+            }
+        });
+    }
+
+    async function abrirSelectorMapa(inputId) {
         mapMarkerTargetInput = inputId;
-        document.getElementById('mapModal').style.display = 'flex';
+        const modal = document.getElementById('mapModal');
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('mapa-abierto');
         
         initMap();
         
-        // Intentar centrar en la ubicación real del usuario al abrir
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => {
-                map.setView([pos.coords.latitude, pos.coords.longitude], 17);
-            });
+        // Intentar centrar de manera asíncrona en la ubicación del usuario
+        try {
+            const pos = await obtenerUbicacionActual();
+            map.setView([pos.coords.latitude, pos.coords.longitude], 17);
+        } catch (error) {
+            console.log("No se pudo obtener la ubicación en tiempo real, usando coordenadas por defecto.");
+            map.setView([DEFAULT_LAT, DEFAULT_LNG], 16);
         }
+        
         map.invalidateSize(); 
     }
 
     function cerrarSelectorMapa() {
-        document.getElementById('mapModal').style.display = 'none';
+        const modal = document.getElementById('mapModal');
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('mapa-abierto');
         document.getElementById('mapSearch').value = '';
     }
 
-    /* OBTENER CALLE Y ENTRECALLE DESDE COORDENADAS (NOMINATIM API) */
+    /* OBTENER CALLE Y ENTRECALLES DESDE COORDENADAS (NOMINATIM API) */
     function obtenerNombreCalle(lat, lng) {
         const preview = document.getElementById('addressPreview');
         preview.innerText = "Buscando dirección...";
 
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+        // Usamos addressdetails=1 y pasamos namedetails=1 para capturar la mayor cantidad de referencias posibles
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&namedetails=1`)
             .then(res => res.json())
             .then(data => {
                 if (data && data.address) {
-                    const road = data.address.road || '';
-                    const suburb = data.address.suburb || data.address.neighbourhood || '';
-                    const city = data.address.city || data.address.town || '';
+                    const adr = data.address;
                     
-                    // Intentamos aproximar entrecalles o referencias locales que devuelve Nominatim
-                    let formatoDireccion = road;
-                    if (suburb) formatoDireccion += `, ${suburb}`;
-                    if (city) formatoDireccion += ` (${city})`;
+                    // Calle principal
+                    const callePrincipal = adr.road || adr.pedestrian || adr.path || '';
+                    
+                    // Elementos cercanos para armar las entrecalles u orientación
+                    const barrio = adr.suburb || adr.neighbourhood || adr.quarter || '';
+                    const ciudad = adr.city || adr.town || adr.village || '';
+                    
+                    // Intentamos pescar si Nominatim guardó alguna referencia de intersección o lugar contiguo
+                    const lugarCercano = adr.amenity || adr.historic || adr.shop || adr.tourism || '';
 
-                    currentAddressString = formatoDireccion || "Dirección no identificada exacta. Puede escribirla arriba.";
+                    let formatoDireccion = "";
+
+                    if (callePrincipal) {
+                        formatoDireccion = callePrincipal;
+                        
+                        // Si Nominatim devuelve un punto de interés o negocio cercano, lo añade como referencia.
+                        if (lugarCercano) {
+                            formatoDireccion += ` (cerca de: ${lugarCercano})`;
+                        } else if (barrio) {
+                            formatoDireccion += `, ${barrio}`;
+                        }
+                    } else if (data.display_name) {
+                        // Si no hay etiqueta de calle definida pero sí un nombre formateado por el mapa, tomamos los primeros segmentos
+                        const segmentos = data.display_name.split(',');
+                        formatoDireccion = segmentos.slice(0, 2).join(',');
+                    }
+
+                    // Si el servidor ya devuelve una estructura formateada con intersecciones nativas de OSM, la tomamos preferentemente
+                    if (data.display_name && (data.display_name.includes(' esquina ') || data.display_name.includes(' e/ '))) {
+                        const partes = data.display_name.split(',');
+                        formatoDireccion = partes[0];
+                    }
+
+                    if (ciudad && !formatoDireccion.includes(ciudad)) {
+                        formatoDireccion += ` (${ciudad})`;
+                    }
+
+                    currentAddressString = formatoDireccion || "Dirección aproximada seleccionada.";
                     preview.innerText = currentAddressString;
                 } else {
                     preview.innerText = "Punto en el mapa seleccionado.";
@@ -538,8 +589,6 @@
         if (currentAddressString && mapMarkerTargetInput) {
             const input = document.getElementById(mapMarkerTargetInput);
             input.value = currentAddressString;
-            
-            // Permitir edición manual inmediata en el input principal una vez seleccionada
             input.removeAttribute('readonly');
         }
         cerrarSelectorMapa();
@@ -557,14 +606,11 @@
     });
 
     /* MAPA EXTERNO UNIVERSAL */
-    function openMapsUniversal() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(pos => {
-                window.open(`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`, "_blank");
-            }, () => {
-                window.open("https://www.google.com/maps", "_blank");
-            });
-        } else {
+    async function openMapsUniversal() {
+        try {
+            const pos = await obtenerUbicacionActual();
+            window.open(`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`, "_blank");
+        } catch (error) {
             window.open("https://www.google.com/maps", "_blank");
         }
     }
