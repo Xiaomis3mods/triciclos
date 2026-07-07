@@ -29,6 +29,8 @@
             --card: #fff;
             --text: #1F2937;
             --border: #E5E7EB;
+            --error: #EF4444;
+            --success: #10B981;
         }
 
         body {
@@ -229,13 +231,39 @@
             margin-right: 6px;
         }
 
+        /* --- VALIDACIONES E INPUTS --- */
+        .form-group {
+            margin-bottom: 12px;
+            position: relative;
+        }
+
         input, select, textarea {
             width: 100%;
             padding: 13px;
-            margin: 7px 0;
+            margin: 4px 0;
             border-radius: 12px;
             border: 1px solid #D1D5DB;
             font-size: 16px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fff;
+        }
+
+        input.invalid, select.invalid, textarea.invalid {
+            border-color: var(--error) !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+        }
+
+        input.valid, select.valid, textarea.valid {
+            border-color: var(--success) !important;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .error-msg {
+            color: var(--error);
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 4px;
+            display: none;
         }
 
         input[readonly] {
@@ -267,7 +295,7 @@
             margin-bottom: 14px;
         }
 
-        /* --- ESTILOS DE LOS MODALES DE OPCIÓN --- */
+        /* --- MODAL DE OPCIONES + HISTORIAL --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -297,6 +325,8 @@
             padding: 24px;
             transform: translateY(100%);
             transition: transform 0.3s ease;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .modal-overlay.active .modal-content {
@@ -304,12 +334,8 @@
         }
 
         @media (min-width: 500px) {
-            .modal-overlay {
-                align-items: center;
-            }
-            .modal-content {
-                border-radius: 12px;
-            }
+            .modal-overlay { align-items: center; }
+            .modal-content { border-radius: 12px; }
         }
 
         .modal-title {
@@ -334,20 +360,52 @@
             font-size: 15px;
             font-weight: bold;
             color: #374151;
-            transition: all 0.2s;
             box-shadow: none;
         }
 
-        .option-btn:hover, .option-btn:active {
+        .option-btn:active {
             background: #FEF2F2;
             border-color: var(--r);
             color: var(--r);
-            transform: none;
         }
 
         .option-btn span {
             margin-right: 12px;
             font-size: 20px;
+        }
+
+        /* Lista de historial */
+        .history-section {
+            margin-top: 16px;
+            border-top: 1px dashed #E5E7EB;
+            padding-top: 14px;
+        }
+
+        .history-title {
+            font-size: 13px;
+            color: #6B7280;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            background: #F3F4F6;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #4B5563;
+        }
+
+        .history-item:active {
+            background: #E5E7EB;
+        }
+
+        .history-item-icon {
+            margin-right: 8px;
         }
 
         .close-modal {
@@ -359,9 +417,10 @@
             cursor: pointer;
             font-weight: 700;
             box-shadow: none;
+            margin-top: 8px;
         }
 
-        /* 🗺️ INTERFAZ DEL MAPA SELECTOR FULLSCREEN */
+        /* 🗺️ INTERFAZ DEL MAPA SELECTOR */
         .map-modal {
             position: fixed;
             top: 0;
@@ -433,7 +492,6 @@
 
     <nav id="menuContent" class="menu-content" aria-label="Menú secundario">
         <p class="card-intro">En Triciclos L&L contamos con un equipo de choferes profesionales altamente experimentados y comprometidos con brindarle una conducción segura y eficiente.</p>
-
         <button class="btn-info" onclick="openMapsUniversal()">📍 Abrir mapa base</button>
         <button id="btn-servicios" class="btn-info" onclick="toggleInfoInterna('servicios', this)">🚖 Nuestros Servicios</button>
         <button id="btn-ayuda" class="btn-info" onclick="toggleInfoInterna('ayuda', this)">❓ ¿Cómo usar la página?</button>
@@ -441,67 +499,56 @@
         <div id="servicios" class="desplegable-info">
             <div class="service-card">
                 <div class="service-title">🚖 Traslado de Pasajeros Urbano</div>
-                <div class="service-text">
-                    Ofrecemos un servicio premium de movilidad urbana en modernas unidades eléctricas. Nos especializamos <strong>estrictamente en recorridos dentro de la ciudad</strong>.
-                </div>
+                <div class="service-text">Ofrecemos un servicio premium de movilidad urbana en modernas unidades eléctricas.</div>
             </div>
             <div class="service-card">
                 <div class="service-title">📦 Traslado de Cargas y Mudanzas</div>
-                <div class="service-text">
-                    La solución logística para el transporte físico de sus pertenencias, compras de volumen y pequeñas mudanzas.
-                </div>
-            </div>
-            <div class="service-card">
-                <div class="service-title">🛠 Asistencia de Remolque Eléctrico</div>
-                <div class="service-text">
-                    Servicio especializado de enganche y remolque para mototaxis u otros vehículos pequeños inoperativos.
-                </div>
+                <div class="service-text">La solución logística para el transporte físico de sus pertenencias.</div>
             </div>
         </div>
 
         <div id="ayuda" class="desplegable-info">
             <div class="service-card">
-                <div class="service-title"><span class="step-number">1</span> Complete el formulario</div>
-                <div class="service-text">Vaya al bloque de "Reserva" en la pantalla principal y rellene sus datos de viaje.</div>
-            </div>
-            <div class="service-card">
-                <div class="service-title"><span class="step-number">2</span> Elija su método de envío</div>
-                <div class="service-text">Presione el botón rojo de <strong>WhatsApp</strong> o el botón blanco de <strong>SMS</strong>.</div>
-            </div>
-            <div class="service-card">
-                <div class="service-title"><span class="step-number">3</span> Envíe el mensaje</div>
-                <div class="service-text">La web abrirá su aplicación con el texto redactado. Solo presione <strong>enviar</strong>.</div>
+                <div class="service-title">✨ Instrucciones básicas</div>
+                <div class="service-text">Complete el formulario usando el mapa o teclado y pulse el botón de envío directo.</div>
             </div>
         </div>
     </nav>
 
     <main class="container">
-
         <button id="btnInstalar" onclick="instalarApp()">📲 Instalar Aplicación Móvil</button>
 
         <section class="card">
             <h2>Reserva</h2>
 
-            <label id="lbl-nombre" for="nombre" class="sr-only">Nombre</label>
-            <input id="nombre" type="text" autocomplete="name" placeholder="Nombre">
+            <div class="form-group">
+                <label for="nombre" class="sr-only">Nombre</label>
+                <input id="nombre" type="text" autocomplete="name" placeholder="Nombre (Obligatorio)" oninput="validarCampoIndividual('nombre')">
+                <span id="err-nombre" class="error-msg">Por favor, introduce tu nombre</span>
+            </div>
 
-            <label id="lbl-tel" for="tel" class="sr-only">Teléfono</label>
-            <input id="tel" type="tel" autocomplete="tel" placeholder="Teléfono">
+            <div class="form-group">
+                <label for="tel" class="sr-only">Teléfono</label>
+                <input id="tel" type="tel" autocomplete="tel" placeholder="Teléfono de contacto (Obligatorio)" oninput="validarCampoIndividual('tel')">
+                <span id="err-tel" class="error-msg">Introduce un número válido</span>
+            </div>
 
-            <label id="lbl-origen" for="origen" class="sr-only">Recogida</label>
-            <input id="origen" type="text" placeholder="📍 Dirección de Recogida" readonly onclick="solicitarMetodoDireccion('origen')">
+            <div class="form-group">
+                <label for="origen" class="sr-only">Recogida</label>
+                <input id="origen" type="text" placeholder="📍 Dirección de Recogida (Obligatorio)" readonly onclick="solicitarMetodoDireccion('origen')">
+                <span id="err-origen" class="error-msg">Selecciona o escribe el lugar de recogida</span>
+            </div>
 
-            <label id="lbl-destino" for="destino" class="sr-only">Destino</label>
-            <input id="destino" type="text" placeholder="🏁 Dirección de Destino" readonly onclick="solicitarMetodoDireccion('destino')">
+            <div class="form-group">
+                <label for="destino" class="sr-only">Destino</label>
+                <input id="destino" type="text" placeholder="🏁 Dirección de Destino (Obligatorio)" readonly onclick="solicitarMetodoDireccion('destino')">
+                <span id="err-destino" class="error-msg">Selecciona o escribe el destino</span>
+            </div>
 
             <label for="pas">Cantidad de pasajeros</label>
             <select id="pas">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
+                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
             </select>
 
             <label for="pago">Método de pago</label>
@@ -510,8 +557,10 @@
                 <option value="Transferencia">Transferencia</option>
             </select>
 
-            <label id="lbl-obs" for="obs" class="sr-only">Observaciones</label>
-            <textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
+            <div class="form-group">
+                <label for="obs" class="sr-only">Observaciones</label>
+                <textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
+            </div>
 
             <button onclick="enviarWhatsApp()">Reservar por WhatsApp</button>
             <button id="btnSms" type="button" style="background:#fff; color:#111827; border: 1px solid #D1D5DB; font-weight:700; width:100%; padding:16px; margin-top:10px; border-radius:999px; box-shadow:0 6px 14px rgba(0,0,0,.15); cursor:pointer;">Reservar por SMS</button>
@@ -519,6 +568,7 @@
         </section>
     </main>
 
+    <!-- INTERFAZ DE SELECCIÓN HÍBRIDA + HISTORIAL -->
     <div class="modal-overlay" id="modalOpcionesDireccion">
         <div class="modal-content">
             <div class="modal-title" id="modalOpcionesTitulo">¿Cómo deseas añadir la dirección?</div>
@@ -531,10 +581,17 @@
                 <span>✍️</span> Escribir dirección manualmente
             </button>
 
+            <!-- Sección dinámica de Historial -->
+            <div class="history-section" id="historialContenedor" style="display:none;">
+                <div class="history-title">Direcciones recientes</div>
+                <div id="historialLista"></div>
+            </div>
+
             <button class="close-modal" onclick="cerrarModalOpciones()">Cancelar</button>
         </div>
     </div>
 
+    <!-- MAPA SELECTOR FULLSCREEN -->
     <div id="mapModal" class="map-modal" role="dialog" aria-hidden="true">
         <div class="map-header">
             <input id="mapSearch" type="text" placeholder="🔍 Escribe una dirección manual..." style="margin:0;">
@@ -560,18 +617,13 @@
     const DEFAULT_LAT = 23.1136;
     const DEFAULT_LNG = -82.3666;
 
-    // --- MANEJO DEL MODAL INTERMEDIO ---
+    // --- MANEJO DEL MODAL DE SELECCIÓN E HISTORIAL ---
     function solicitarMetodoDireccion(inputId) {
-        // Si el usuario ya cargó texto y quiere editarlo directamente dentro del input principal
-        const inputDestino = document.getElementById(inputId);
-        if (!inputDestino.hasAttribute('readonly')) return;
-
         mapMarkerTargetInput = inputId;
         const modal = document.getElementById('modalOpcionesDireccion');
-        const titulo = document.getElementById('modalOpcionesTitulo');
+        document.getElementById('modalOpcionesTitulo').innerText = inputId === 'origen' ? 'Lugar de Recogida' : 'Dirección de Destino';
         
-        titulo.innerText = inputId === 'origen' ? '¿Cómo deseas añadir el Lugar de Recogida?' : '¿Cómo deseas añadir el Destino?';
-        
+        cargarHistorialUI();
         modal.classList.add('active');
         document.body.classList.add('modal-abierto');
     }
@@ -583,21 +635,93 @@
 
     function ejecutarOpcionSeleccionada(tipo) {
         cerrarModalOpciones();
+        const input = document.getElementById(mapMarkerTargetInput);
         if (tipo === 'manual') {
-            activarInputEdicionDirecta(mapMarkerTargetInput);
+            input.removeAttribute('readonly');
+            input.focus();
         } else if (tipo === 'mapa') {
             abrirSelectorMapa(mapMarkerTargetInput);
         }
     }
 
-    function activarInputEdicionDirecta(inputId) {
-        const input = document.getElementById(inputId);
-        input.removeAttribute('readonly');
-        input.focus();
+    // --- LOGICA HISTORIAL DE DIRECCIONES (LOCALSTORAGE) ---
+    function guardarEnHistorial(direccion) {
+        if (!direccion || direccion.startsWith("Coordenadas") || direccion.startsWith("Ubicación")) return;
+        let historial = JSON.parse(localStorage.getItem('lyl_historial_direcciones')) || [];
+        historial = historial.filter(item => item.toLowerCase() !== direccion.toLowerCase());
+        historial.unshift(direccion);
+        if (historial.length > 5) historial.pop(); // Máximo 5 registros
+        localStorage.setItem('lyl_historial_direcciones', JSON.stringify(historial));
+    }
+
+    function cargarHistorialUI() {
+        const historial = JSON.parse(localStorage.getItem('lyl_historial_direcciones')) || [];
+        const contenedor = document.getElementById('historialContenedor');
+        const lista = document.getElementById('historialLista');
+        
+        lista.innerHTML = '';
+        if (historial.length === 0) {
+            contenedor.style.display = 'none';
+            return;
+        }
+        
+        contenedor.style.display = 'block';
+        historial.forEach(dir => {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `<span class="history-item-icon">🕒</span> <span>${dir}</span>`;
+            item.onclick = () => {
+                const input = document.getElementById(mapMarkerTargetInput);
+                input.value = dir;
+                validarCampoIndividual(mapMarkerTargetInput);
+                cerrarModalOpciones();
+            };
+            lista.appendChild(item);
+        });
+    }
+
+    // --- VALIDACIONES REALES Y EN TIEMPO REAL ---
+    function validarCampoIndividual(id) {
+        const input = document.getElementById(id);
+        const errorSpan = document.getElementById(`err-${id}`);
+        let valido = true;
+
+        if (id === 'tel') {
+            // Permite números de teléfono normales y formatos básicos
+            const telRegex = /^[0-9+\s-]{6,15}$/;
+            valido = telRegex.test(input.value.trim());
+        } else {
+            valido = input.value.trim().length > 2;
+        }
+
+        if (valido) {
+            input.classList.remove('invalid');
+            input.classList.add('valid');
+            if(errorSpan) errorSpan.style.display = 'none';
+        } else {
+            input.classList.remove('valid');
+            input.classList.add('invalid');
+        }
+        return valido;
+    }
+
+    function validarFormularioCompleto() {
+        const campos = ['nombre', 'tel', 'origen', 'destino'];
+        let todoValido = true;
+
+        campos.forEach(id => {
+            const esValido = validarCampoIndividual(id);
+            const errorSpan = document.getElementById(`err-${id}`);
+            if (!esValido) {
+                todoValido = false;
+                if(errorSpan) errorSpan.style.display = 'block';
+            }
+        });
+        return todoValido;
     }
 
 
-    // --- LÓGICA DE MAPAS Y LOCALIZACIÓN ---
+    // --- SISTEMA MAPS & LEAFLET ---
     function initMap() {
         if (!map) {
             map = L.map('map-container').setView([DEFAULT_LAT, DEFAULT_LNG], 16);
@@ -614,177 +738,114 @@
 
     function obtenerUbicacionActual() {
         return new Promise((resolve, reject) => {
-            if (!navigator.geolocation) {
-                reject(new Error("Geolocalización no soportada"));
-            } else {
-                navigator.geolocation.getCurrentPosition(resolve, reject, {
-                    enableHighAccuracy: true,
-                    timeout: 6000,
-                    maximumAge: 0
-                });
-            }
+            if (!navigator.geolocation) reject(new Error("Geolocalización denegada"));
+            else navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 5000 });
         });
     }
 
     async function abrirSelectorMapa(inputId) {
         mapMarkerTargetInput = inputId;
-        const modal = document.getElementById('mapModal');
-        modal.style.display = 'flex';
-        modal.setAttribute('aria-hidden', 'false');
+        document.getElementById('mapModal').style.display = 'flex';
         document.body.classList.add('mapa-abierto');
-        
         initMap();
         
         document.getElementById('addressPreview').innerText = "Localizando posición...";
-
         try {
             const pos = await obtenerUbicacionActual();
             map.setView([pos.coords.latitude, pos.coords.longitude], 17);
-        } catch (error) {
+        } catch {
             map.setView([DEFAULT_LAT, DEFAULT_LNG], 16);
             obtenerNombreCalle(DEFAULT_LAT, DEFAULT_LNG);
         }
-        
-        setTimeout(() => {
-            if(map) map.invalidateSize();
-        }, 200);
+        setTimeout(() => map.invalidateSize(), 200);
     }
 
     function cerrarSelectorMapa() {
-        const modal = document.getElementById('mapModal');
-        modal.style.display = 'none';
-        modal.setAttribute('aria-hidden', 'true');
+        document.getElementById('mapModal').style.display = 'none';
         document.body.classList.remove('mapa-abierto');
         document.getElementById('mapSearch').value = '';
     }
 
     async function obtenerNombreCalle(lat, lng) {
         const preview = document.getElementById('addressPreview');
-        preview.innerText = "Calculando entrecalles...";
-
-        const fetchOptions = {
-            headers: {
-                'User-Agent': 'TriciclosLyLPro/1.0 (contacto: admin@tricicloslyl.com)'
-            }
-        };
+        preview.innerText = "Buscando entrecalles...";
+        const fetchOptions = { headers: { 'User-Agent': 'TriciclosLyLPro/1.0' } };
 
         try {
-            const resPrincipal = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, fetchOptions);
-            const dataPrincipal = await resPrincipal.json();
-
-            if (!dataPrincipal || !dataPrincipal.address) {
-                preview.innerText = "Punto seleccionado en el mapa.";
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, fetchOptions);
+            const data = await res.json();
+            if (!data || !data.address) {
                 currentAddressString = `Coordenadas: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-                return;
-            }
-
-            const adr = dataPrincipal.address;
-            const callePrincipal = adr.road || adr.pedestrian || adr.path || '';
-            const barrio = adr.suburb || adr.neighbourhood || '';
-            const ciudad = adr.city || adr.town || '';
-
-            if (!callePrincipal) {
-                const segmentos = (dataPrincipal.display_name || "").split(',');
-                currentAddressString = segmentos.slice(0, 2).join(',');
                 preview.innerText = currentAddressString;
                 return;
             }
 
-            const offset = 0.0006; 
-            const puntosBusqueda = [
-                { lat: lat + offset, lng: lng }, 
-                { lat: lat - offset, lng: lng }, 
-                { lat: lat, lng: lng + offset }, 
-                { lat: lat, lng: lng - offset }  
+            const adr = data.address;
+            let calle = adr.road || adr.pedestrian || adr.path || '';
+            const barrio = adr.suburb || adr.neighbourhood || '';
+            
+            if(!calle) {
+                currentAddressString = (data.display_name || "").split(',').slice(0, 2).join(',');
+                preview.innerText = currentAddressString;
+                return;
+            }
+
+            // Muestreo rápido de esquinas circundantes
+            const offset = 0.0006;
+            const promesas = [
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat+offset}&lon=${lng}&zoom=18`, fetchOptions).then(r=>r.json()).catch(()=>null),
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat-offset}&lon=${lng}&zoom=18`, fetchOptions).then(r=>r.json()).catch(()=>null)
             ];
-
-            const promesas = puntosBusqueda.map(p => 
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.lat}&lon=${p.lng}&zoom=18&addressdetails=1`, fetchOptions)
-                    .then(r => r.json())
-                    .catch(() => null)
-            );
-
-            const resultados = await Promise.all(promesas);
-            let entrecallesDetectadas = [];
-
-            resultados.forEach(res => {
-                if (res && res.address) {
-                    const calleCercana = res.address.road || res.address.pedestrian || '';
-                    if (calleCercana && calleCercana !== callePrincipal && !entrecallesDetectadas.includes(calleCercana)) {
-                        entrecallesDetectadas.push(calleCercana);
-                    }
+            const resEsquinas = await Promise.all(promesas);
+            let entrecalles = [];
+            resEsquinas.forEach(r => {
+                if(r && r.address) {
+                    let cCercana = r.address.road || r.address.pedestrian || '';
+                    if(cCercana && cCercana !== calle && !entrecalles.includes(cCercana)) entrecalles.push(cCercana);
                 }
             });
 
-            let stringFinal = callePrincipal;
+            if (entrecalles.length >= 2) calle += ` e/ ${entrecalles[0]} y ${entrecalles[1]}`;
+            else if (entrecalles.length === 1) calle += ` y esq. ${entrecalles[0]}`;
+            else if (barrio) calle += `, ${barrio}`;
 
-            if (entrecallesDetectadas.length >= 2) {
-                stringFinal += ` e/ ${entrecallesDetectadas[0]} y ${entrecallesDetectadas[1]}`;
-            } else if (entrecallesDetectadas.length === 1) {
-                stringFinal += ` y esquina ${entrecallesDetectadas[0]}`;
-            } else if (barrio) {
-                stringFinal += `, ${barrio}`;
-            }
-
-            if (ciudad && !stringFinal.includes(ciudad)) {
-                stringFinal += ` (${ciudad})`;
-            }
-
-            currentAddressString = stringFinal;
+            currentAddressString = calle;
             preview.innerText = currentAddressString;
-
-        } catch (err) {
-            preview.innerText = "Error de red. Puedes confirmar e ingresar detalles a mano.";
+        } catch {
             currentAddressString = `Ubicación (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            preview.innerText = currentAddressString;
         }
     }
 
     function buscarDireccionManual() {
         const query = document.getElementById('mapSearch').value.trim();
         if (!query) return;
-
-        document.getElementById('addressPreview').innerText = "Buscando...";
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
-            headers: { 'User-Agent': 'TriciclosLyLPro/1.0 (contacto: admin@tricicloslyl.com)' }
-        })
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, { headers: { 'User-Agent': 'TriciclosLyLPro/1.0' } })
             .then(res => res.json())
-            .then(data => {
-                if (data && data.length > 0) {
-                    const target = data[0];
-                    map.setView([target.lat, target.lon], 17);
-                } else {
-                    alert("No se encontró la ubicación. Intenta ingresando una referencia más amplia.");
-                    document.getElementById('addressPreview').innerText = "Mueve el mapa para ubicar la dirección...";
-                }
-            })
-            .catch(() => {
-                alert("Error al conectar con el servidor de búsqueda.");
-            });
+            .then(data => { if(data.length > 0) map.setView([data[0].lat, data[0].lon], 17); })
+            .catch(() => alert("Búsqueda no disponible. Mueve el mapa manualmente."));
     }
 
     function confirmarDireccion() {
         if (currentAddressString && mapMarkerTargetInput) {
-            activarInputEdicionDirecta(mapMarkerTargetInput);
-            document.getElementById(mapMarkerTargetInput).value = currentAddressString;
+            const input = document.getElementById(mapMarkerTargetInput);
+            input.value = currentAddressString;
+            guardarEnHistorial(currentAddressString);
+            validarCampoIndividual(mapMarkerTargetInput);
         }
         cerrarSelectorMapa();
     }
 
-    function vibrar() {
-        if (navigator.vibrate) navigator.vibrate(80);
-    }
-
-    document.addEventListener("click", (e) => {
-        if (e.target.tagName === "BUTTON" || e.target.classList.contains("btn") || e.target.classList.contains("menu-trigger") || e.target.classList.contains("option-btn")) {
-            vibrar();
-        }
+    function vibrar() { if (navigator.vibrate) navigator.vibrate(60); }
+    document.addEventListener("click", e => {
+        if (e.target.tagName === "BUTTON" || e.target.classList.contains("btn") || e.target.classList.contains("option-btn") || e.target.classList.contains("history-item")) vibrar();
     });
 
     async function openMapsUniversal() {
         try {
             const pos = await obtenerUbicacionActual();
             window.open(`https://www.google.com/maps/search/?api=1&query=${pos.coords.latitude},${pos.coords.longitude}`, "_blank");
-        } catch (error) {
+        } catch {
             window.open(`https://www.google.com/maps/search/?api=1&query=${DEFAULT_LAT},${DEFAULT_LNG}`, "_blank");
         }
     }
@@ -793,66 +854,44 @@
         const menu = document.getElementById("menuContent");
         const overlay = document.getElementById("menuOverlay");
         const btn = document.getElementById("menuBtn");
-
         if (menu.classList.contains("open")) {
-            menu.classList.remove("open");
-            overlay.classList.remove("show");
-            document.body.classList.remove("menu-abierto");
-            setTimeout(() => overlay.style.display = "none", 300);
-            btn.innerHTML = "☰";
-            btn.classList.remove("active");
+            menu.classList.remove("open"); overlay.classList.remove("show"); document.body.classList.remove("menu-abierto");
+            setTimeout(() => overlay.style.display = "none", 300); btn.innerHTML = "☰";
         } else {
-            overlay.style.display = "block";
-            setTimeout(() => overlay.classList.add("show"), 10);
-            menu.classList.add("open");
-            document.body.classList.add("menu-abierto");
-            btn.innerHTML = "←";
-            btn.classList.add("active");
-            location.hash = "info";
+            overlay.style.display = "block"; setTimeout(() => overlay.classList.add("show"), 10);
+            menu.classList.add("open"); document.body.classList.add("menu-abierto"); btn.innerHTML = "←";
         }
     }
-
-    window.addEventListener("popstate", () => {
-        const menu = document.getElementById("menuContent");
-        if (menu.classList.contains("open") && location.hash !== "#info") toggleMenu();
-    });
 
     function toggleInfoInterna(id, elementoBoton) {
         const target = document.getElementById(id);
         const esVisible = target.style.display === "block";
         document.querySelectorAll('.desplegable-info').forEach(el => el.style.display = 'none');
         document.querySelectorAll('.menu-content .btn-info').forEach(btn => btn.classList.remove('active'));
-        if (!esVisible) {
-            target.style.display = "block";
-            elementoBoton.classList.add('active');
-        }
+        if (!esVisible) { target.style.display = "block"; elementoBoton.classList.add('active'); }
     }
 
-    function mensaje() {
+    function procesarMensajeTexto() {
+        if (!validarFormularioCompleto()) return null;
+
         const g = id => document.getElementById(id).value.trim();
-        const nombre = g("nombre");
-        const tel = g("tel");
         const origen = g("origen");
         const destino = g("destino");
-        const pas = g("pas");
-        const pago = g("pago");
-        const obs = g("obs");
 
-        if (!nombre || !tel || !origen || !destino) {
-            alert("Completa todos los campos obligatorios incluyendo origen y destino.");
-            return null;
-        }
-        return `🚖 NUEVA RESERVA\n\n👤 Nombre: ${nombre}\n📞 Teléfono: ${tel}\n📍 Recogida: ${origen}\n🏁 Destino: ${destino}\n👥 Pasajeros: ${pas}\n💳 Método de pago: ${pago}\n📝 Observaciones: ${obs || "Ninguna"}`;
+        // Al enviar con éxito el formulario completo, nos aseguramos de guardar en el historial lo escrito a mano también
+        guardarEnHistorial(origen);
+        guardarEnHistorial(destino);
+
+        return `🚖 NUEVA RESERVA\n\n👤 Nombre: ${g("nombre")}\n📞 Teléfono: ${g("tel")}\n📍 Recogida: ${origen}\n🏁 Destino: ${destino}\n👥 Pasajeros: ${g("pas")}\n💳 Pago: ${g("pago")}\n📝 Obs: ${g("obs") || "Ninguna"}`;
     }
 
     function enviarWhatsApp() {
-        const m = mensaje();
+        const m = procesarMensajeTexto();
         if (m) window.open("https://wa.me/5354632153?text=" + encodeURIComponent(m), "_blank");
     }
 
-    function enviarSMS(e) {
-        if (e) e.preventDefault();
-        const m = mensaje();
+    function enviarSMS() {
+        const m = procesarMensajeTexto();
         if (m) {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
             location.href = "sms:+5354632153" + (isIOS ? ';' : '?') + "body=" + encodeURIComponent(m);
