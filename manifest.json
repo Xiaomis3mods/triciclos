@@ -1,0 +1,18 @@
+{
+  "name": "Triciclos L&L Pro",
+  "short_name": "Triciclos L&L",
+  "description": "Tu destino, nuestro compromiso. Reserva de traslados urbanos en unidades eléctricas.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#F3F6FA",
+  "theme_color": "#E63946",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/Xiaomis3mods/triciclos/97c42016ba31bcfc5f6aa4216a2270646f110d68/6%20sin%20t%C3%ADtulo_20260702094854.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
