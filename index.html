@@ -415,7 +415,7 @@
             <textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
 
             <button onclick="enviarWhatsApp()">Reservar por WhatsApp</button>
-            <button id="btnSms" class="btn" style="background:#fff; color:#111827; border: 1px solid #D1D5DB;">Reservar por SMS</button>
+            <button id="btnSms" type="button" style="background:#fff; color:#111827; border: 1px solid #D1D5DB; font-weight:700; width:100%; padding:16px; margin-top:10px; border-radius:999px; box-shadow:0 6px 14px rgba(0,0,0,.15); cursor:pointer;">Reservar por SMS</button>
             <a class="btn btn-call" href="tel:+5354632153">Llamar ahora</a>
         </section>
     </main>
@@ -489,7 +489,9 @@
             map.setView([DEFAULT_LAT, DEFAULT_LNG], 16);
         }
         
-        map.invalidateSize(); 
+        setTimeout(() => {
+            if(map) map.invalidateSize();
+        }, 100);
     }
 
     function cerrarSelectorMapa() {
@@ -500,13 +502,11 @@
         document.getElementById('mapSearch').value = '';
     }
 
-    /* 🧙‍♂️ LÓGICA AVANZADA DE INTERSECCIONES Y ENTRECALLES */
     async function obtenerNombreCalle(lat, lng) {
         const preview = document.getElementById('addressPreview');
         preview.innerText = "Calculando entrecalles...";
 
         try {
-            // 1. Conseguir la calle donde está la mira central
             const resPrincipal = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
             const dataPrincipal = await resPrincipal.json();
 
@@ -528,16 +528,14 @@
                 return;
             }
 
-            // Desplazamientos geométricos (~60 metros en cruz) para detectar esquinas laterales de forma asíncrona
             const offset = 0.0006; 
             const puntosBusqueda = [
-                { lat: lat + offset, lng: lng }, // Arriba / Norte
-                { lat: lat - offset, lng: lng }, // Abajo / Sur
-                { lat: lat, lng: lng + offset }, // Derecha / Este
-                { lat: lat, lng: lng - offset }  // Izquierda / Oeste
+                { lat: lat + offset, lng: lng }, 
+                { lat: lat - offset, lng: lng }, 
+                { lat: lat, lng: lng + offset }, 
+                { lat: lat, lng: lng - offset }  
             ];
 
-            // Consultar los 4 puntos adyacentes en paralelo para máxima velocidad
             const promesas = puntosBusqueda.map(p => 
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${p.lat}&lon=${p.lng}&zoom=18&addressdetails=1`)
                     .then(r => r.json())
@@ -545,19 +543,17 @@
             );
 
             const resultados = await Promise.all(promesas);
-            let entrecalles Detectadas = [];
+            let entrecallesDetectadas = [];
 
             resultados.forEach(res => {
                 if (res && res.address) {
                     const calleCercana = res.address.road || res.address.pedestrian || '';
-                    // Si encontramos una calle mapeada diferente a la calle en la que estamos parados, es una entrecalle válida
                     if (calleCercana && calleCercana !== callePrincipal && !entrecallesDetectadas.includes(calleCercana)) {
                         entrecallesDetectadas.push(calleCercana);
                     }
                 }
             });
 
-            // Dar formato final limpio al texto del formulario
             let stringFinal = callePrincipal;
 
             if (entrecallesDetectadas.length >= 2) {
