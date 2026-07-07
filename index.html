@@ -11,6 +11,8 @@
     <meta name="apple-mobile-web-app-title" content="Triciclos L&L">
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/97c42016ba31bcfc5f6aa4216a2270646f110d68/6%20sin%20t%C3%ADtulo_20260702094854.jpg">
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <style>
         * {
             margin: 0;
@@ -35,8 +37,8 @@
             overflow-x: hidden;
         }
 
-        body.menu-abierto {
-            overflow: hidden; /* Evita scroll de fondo cuando el menú está abierto */
+        body.menu-abierto, body.mapa-abierto {
+            overflow: hidden;
         }
 
         header {
@@ -51,7 +53,6 @@
             display: block;
         }
 
-        /* 📌 BOTÓN FLOTANTE PERMANENTE EN LA PARTE SUPERIOR DERECHA */
         .menu-trigger {
             position: fixed;
             top: 16px;
@@ -73,7 +74,7 @@
         }
 
         .menu-trigger.active {
-            background: #111827; /* Cambia a un tono oscuro neutro al estar activo */
+            background: #111827;
             transform: scale(1.05);
         }
 
@@ -108,7 +109,6 @@
             text-align: center;
         }
 
-        /* 📱 MENÚ DESPLEGABLE LATERAL DERECHO */
         .menu-content {
             position: fixed;
             top: 0;
@@ -128,7 +128,6 @@
             right: 0;
         }
 
-        /* CAPA OSCURA DE FONDO */
         .menu-overlay {
             position: fixed;
             top: 0;
@@ -147,7 +146,6 @@
             opacity: 1;
         }
 
-        /* BOTONES DEL SISTEMA */
         button, .btn {
             display: block;
             width: 100%;
@@ -185,7 +183,6 @@
             filter: brightness(.95);
         }
 
-        /* SECCIONES INTERNAS EN EL PANEL LATERAL */
         .desplegable-info {
             display: none;
             animation: fade .3s ease;
@@ -232,7 +229,6 @@
             margin-right: 6px;
         }
 
-        /* FORMULARIO */
         input, select, textarea {
             width: 100%;
             padding: 13px;
@@ -265,13 +261,70 @@
             color: #fff;
             margin-bottom: 14px;
         }
+
+        /* 🗺️ INTERFAZ DEL MAPA SELECTOR FULLSCREEN */
+        .map-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .map-header {
+            padding: 12px;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 2002;
+            display: flex;
+            gap: 8px;
+        }
+
+        #map-container {
+            flex-grow: 1;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Marcador de mira fijo en el centro */
+        .map-center-marker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -100%);
+            z-index: 2001;
+            pointer-events: none;
+            font-size: 32px;
+        }
+
+        .map-footer {
+            padding: 14px;
+            background: #fff;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 2002;
+        }
+
+        .address-preview {
+            font-size: 14px;
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 10px;
+            text-align: center;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 
 <body>
 
     <header>
-        <!-- Botón del menú optimizado con estados accesibles y visuales -->
         <button id="menuBtn" class="menu-trigger" onclick="toggleMenu()" aria-label="Abrir información">☰</button>
         <img src="https://raw.githubusercontent.com/Xiaomis3mods/triciclos/97c42016ba31bcfc5f6aa4216a2270646f110d68/6%20sin%20t%C3%ADtulo_20260702094854.jpg" loading="lazy" alt="Banner Triciclos L&L">
     </header>
@@ -283,7 +336,7 @@
     <nav id="menuContent" class="menu-content">
         <p class="card-intro">En Triciclos L&L contamos con un equipo de choferes profesionales altamente experimentados y comprometidos con brindarle una conducción segura y eficiente.</p>
 
-        <button class="btn-info" onclick="openMaps()">📍 Abrir mapa</button>
+        <button class="btn-info" onclick="openMapsUniversal()">📍 Abrir mapa base</button>
         <button id="btn-servicios" class="btn-info" onclick="toggleInfoInterna('servicios', this)">🚖 Nuestros Servicios</button>
         <button id="btn-ayuda" class="btn-info" onclick="toggleInfoInterna('ayuda', this)">❓ ¿Cómo usar la página?</button>
 
@@ -294,14 +347,12 @@
                     Ofrecemos un servicio premium de movilidad urbana en modernas unidades eléctricas. Nos especializamos <strong>estrictamente en recorridos dentro de la ciudad</strong>.
                 </div>
             </div>
-
             <div class="service-card">
                 <div class="service-title">📦 Traslado de Cargas y Mudanzas</div>
                 <div class="service-text">
                     La solución logística para el transporte físico de sus pertenencias, compras de volumen y pequeñas mudanzas.
                 </div>
             </div>
-
             <div class="service-card">
                 <div class="service-title">🛠 Asistencia de Remolque Eléctrico</div>
                 <div class="service-text">
@@ -340,10 +391,10 @@
             <input id="tel" type="tel" autocomplete="tel" placeholder="Teléfono">
 
             <label id="lbl-origen" for="origen" class="sr-only">Recogida</label>
-            <input id="origen" type="text" placeholder="Recogida">
+            <input id="origen" type="text" placeholder="📍 Dirección de Recogida" readonly onclick="abrirSelectorMapa('origen')">
 
             <label id="lbl-destino" for="destino" class="sr-only">Destino</label>
-            <input id="destino" type="text" placeholder="Destino">
+            <input id="destino" type="text" placeholder="🏁 Dirección de Destino" readonly onclick="abrirSelectorMapa('destino')">
 
             <label for="pas">Cantidad de pasajeros</label>
             <select id="pas">
@@ -365,18 +416,138 @@
             <textarea id="obs" placeholder="Observaciones (opcional)"></textarea>
 
             <button onclick="enviarWhatsApp()">Reservar por WhatsApp</button>
-            <a href="#" id="btnSms" class="btn">Reservar por SMS</a>
+            <a href="javascript:void(0)" id="btnSms" class="btn">Reservar por SMS</a>
             <a class="btn btn-call" href="tel:+5354632153">Llamar ahora</a>
         </section>
-
     </div>
 
+    <div id="mapModal" class="map-modal">
+        <div class="map-header">
+            <input id="mapSearch" type="text" placeholder="🔍 Escribe una dirección manual..." style="margin:0;">
+            <button onclick="buscarDireccionManual()" style="width:auto; padding:0 18px; margin:0; background:#111827;">Buscar</button>
+        </div>
+        <div id="map-container">
+            <div class="map-center-marker">📍</div>
+        </div>
+        <div class="map-footer">
+            <div id="addressPreview" class="address-preview">Mueve el mapa para ubicar la dirección...</div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="cerrarSelectorMapa()" style="background:#6B7280; margin:0;">Cancelar</button>
+                <button onclick="confirmarDireccion()" style="background:#25D366; margin:0;">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    /* VARIABLES GLOBALES DEL MAPA */
+    let map, mapMarkerTargetInput = '';
+    let currentAddressString = '';
+    let searchTimeout;
+
+    // Coordenadas por defecto (Centro de La Habana, Cuba. Cambiar si es necesario)
+    const DEFAULT_LAT = 23.1136;
+    const DEFAULT_LNG = -82.3666;
+
+    function initMap() {
+        if (!map) {
+            map = L.map('map-container').setView([DEFAULT_LAT, DEFAULT_LNG], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            // Escuchar el final del movimiento del mapa para hacer Geocodificación Inversa (Calles)
+            map.on('moveend', () => {
+                const center = map.getCenter();
+                obtenerNombreCalle(center.lat, center.lng);
+            });
+        }
+    }
+
+    function abrirSelectorMapa(inputId) {
+        mapMarkerTargetInput = inputId;
+        document.getElementById('mapModal').style.display = 'flex';
+        document.body.classList.add('mapa-abierto');
+        
+        initMap();
+        
+        // Intentar centrar en la ubicación real del usuario al abrir
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                map.setView([pos.coords.latitude, pos.coords.longitude], 17);
+            });
+        }
+        map.invalidateSize(); 
+    }
+
+    function cerrarSelectorMapa() {
+        document.getElementById('mapModal').style.display = 'none';
+        document.body.classList.remove('mapa-abierto');
+        document.getElementById('mapSearch').value = '';
+    }
+
+    /* OBTENER CALLE Y ENTRECALLE DESDE COORDENADAS (NOMINATIM API) */
+    function obtenerNombreCalle(lat, lng) {
+        const preview = document.getElementById('addressPreview');
+        preview.innerText = "Buscando dirección...";
+
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.address) {
+                    const road = data.address.road || '';
+                    const suburb = data.address.suburb || data.address.neighbourhood || '';
+                    const city = data.address.city || data.address.town || '';
+                    
+                    // Intentamos aproximar entrecalles o referencias locales que devuelve Nominatim
+                    let formatoDireccion = road;
+                    if (suburb) formatoDireccion += `, ${suburb}`;
+                    if (city) formatoDireccion += ` (${city})`;
+
+                    currentAddressString = formatoDireccion || "Dirección no identificada exacta. Puede escribirla arriba.";
+                    preview.innerText = currentAddressString;
+                } else {
+                    preview.innerText = "Punto en el mapa seleccionado.";
+                    currentAddressString = `Coordenadas: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                }
+            })
+            .catch(() => {
+                preview.innerText = "Error de conexión. Puede confirmar o escribir manualmente.";
+            });
+    }
+
+    /* BUSCADOR MANUAL INTEGRADO */
+    function buscarDireccionManual() {
+        const query = document.getElementById('mapSearch').value.trim();
+        if (!query) return;
+
+        document.getElementById('addressPreview').innerText = "Buscando...";
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const target = data[0];
+                    map.setView([target.lat, target.lon], 17);
+                } else {
+                    alert("No se encontró la dirección. Intenta con referencias más claras.");
+                }
+            });
+    }
+
+    function confirmarDireccion() {
+        if (currentAddressString && mapMarkerTargetInput) {
+            const input = document.getElementById(mapMarkerTargetInput);
+            input.value = currentAddressString;
+            
+            // Permitir edición manual inmediata en el input principal una vez seleccionada
+            input.removeAttribute('readonly');
+        }
+        cerrarSelectorMapa();
+    }
+
     /* 📳 Vibración táctil móvil */
     function vibrar() {
-        if (navigator.vibrate) {
-            navigator.vibrate(80);
-        }
+        if (navigator.vibrate) navigator.vibrate(80);
     }
 
     document.addEventListener("click", (e) => {
@@ -385,74 +556,53 @@
         }
     });
 
-    /* MAPA GOOGLE */
-    function openMaps() {
+    /* MAPA EXTERNO UNIVERSAL */
+    function openMapsUniversal() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(pos => {
-                const lat = pos.coords.latitude;
-                const lng = pos.coords.longitude;
-                window.open(`https://maps.google.com/?q=${lat},${lng}`, "_blank");
+                window.open(`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`, "_blank");
             }, () => {
-                window.open("https://maps.google.com/", "_blank");
+                window.open("https://www.google.com/maps", "_blank");
             });
         } else {
-            window.open("https://maps.google.com/", "_blank");
+            window.open("https://www.google.com/maps", "_blank");
         }
     }
 
-    /* 🔄 CONTROL DEL MENÚ DESPLEGABLE LATERAL (CON SISTEMA DE RETORNO NATIVO) */
+    /* 🔄 CONTROL DEL PANEL LATERAL */
     function toggleMenu() {
         const menu = document.getElementById("menuContent");
         const overlay = document.getElementById("menuOverlay");
         const btn = document.getElementById("menuBtn");
 
         if (menu.classList.contains("open")) {
-            // Acción Volver atrás / Cerrar panel
             menu.classList.remove("open");
             overlay.classList.remove("show");
             document.body.classList.remove("menu-abierto");
             setTimeout(() => overlay.style.display = "none", 300);
-            
             btn.innerHTML = "☰";
             btn.classList.remove("active");
-            btn.setAttribute("aria-label", "Abrir información");
-
-            // Quitar el hash virtual del historial si se cierra de forma manual
-            if (location.hash === "#info") {
-                history.replaceState(null, document.title, window.location.pathname + window.location.search);
-            }
         } else {
-            // Acción Abrir Menú
             overlay.style.display = "block";
             setTimeout(() => overlay.classList.add("show"), 10);
             menu.classList.add("open");
             document.body.classList.add("menu-abierto");
-            
             btn.innerHTML = "←";
             btn.classList.add("active");
-            btn.setAttribute("aria-label", "Volver atrás");
-
-            // Crear una entrada en el historial para soportar el botón "Atrás" de Android
             location.hash = "info";
         }
     }
 
-    // Escuchar el evento popstate para cerrar el menú si el usuario pulsa el botón físico de retroceso del teléfono
     window.addEventListener("popstate", () => {
         const menu = document.getElementById("menuContent");
-        if (menu.classList.contains("open") && location.hash !== "#info") {
-            toggleMenu();
-        }
+        if (menu.classList.contains("open") && location.hash !== "#info") toggleMenu();
     });
 
-    /* CONTROL DE LOS SUBPANELES E INDICADORES DE BOTONES */
     function toggleInfoInterna(id, elementoBoton) {
         const target = document.getElementById(id);
         const esVisible = target.style.display === "block";
-
         document.querySelectorAll('.desplegable-info').forEach(el => el.style.display = 'none');
         document.querySelectorAll('.menu-content .btn-info').forEach(btn => btn.classList.remove('active'));
-
         if (!esVisible) {
             target.style.display = "block";
             elementoBoton.classList.add('active');
@@ -462,7 +612,6 @@
     /* MENSAJE AUTOMÁTICO DE RESERVA */
     function mensaje() {
         const g = id => document.getElementById(id).value.trim();
-
         const nombre = g("nombre");
         const tel = g("tel");
         const origen = g("origen");
@@ -471,74 +620,32 @@
         const pago = g("pago");
         const obs = g("obs");
 
-        if (!nombre || !tel || !origen || !destino || !pas || !pago) {
-            alert("Completa todos los campos obligatorios");
+        if (!nombre || !tel || !origen || !destino) {
+            alert("Completa todos los campos obligatorios incluyendo origen y destino.");
             return null;
         }
-
         return `🚖 NUEVA RESERVA\n\n👤 Nombre: ${nombre}\n📞 Teléfono: ${tel}\n📍 Recogida: ${origen}\n🏁 Destino: ${destino}\n👥 Pasajeros: ${pas}\n💳 Método de pago: ${pago}\n📝 Observaciones: ${obs || "Ninguna"}`;
     }
 
-    /* COMPARTIR POR WHATSAPP */
     function enviarWhatsApp() {
         const m = mensaje();
-        if (m) {
-            window.open("https://wa.me/5354632153?text=" + encodeURIComponent(m), "_blank");
-        }
+        if (m) window.open("https://wa.me/5354632153?text=" + encodeURIComponent(m), "_blank");
     }
 
-    /* COMPARTIR POR SMS */
     function enviarSMS(e) {
         if (e) e.preventDefault();
         const m = mensaje();
         if (m) {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            const separador = isIOS ? ';' : '?';
-            location.href = "sms:+5354632153" + separador + "body=" + encodeURIComponent(m);
+            location.href = "sms:+5354632153" + (isIOS ? ';' : '?') + "body=" + encodeURIComponent(m);
         }
     }
-
     document.getElementById('btnSms').addEventListener('click', enviarSMS);
 
-    /* SISTEMA DE INSTALACIÓN PWA */
+    /* PWA */
     let eventoInstalacion;
-    const btnInstalar = document.getElementById('btnInstalar');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault(); 
-        eventoInstalacion = e; 
-        btnInstalar.style.display = 'block'; 
-    });
-
-    function instalarApp() {
-        if (!eventoInstalacion) return;
-        btnInstalar.style.display = 'none'; 
-        eventoInstalacion.prompt(); 
-        eventoInstalacion.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('El usuario aceptó instalar Triciclos L&L');
-            }
-            eventoInstalacion = null;
-        });
-    }
-
-    window.addEventListener('appinstalled', () => {
-        btnInstalar.style.display = 'none';
-        eventoInstalacion = null;
-    });
-
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            const swCode = `
-                self.addEventListener('install', e => self.skipWaiting());
-                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-                self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => {})));
-            `;
-            const blob = new Blob([swCode], { type: 'application/javascript' });
-            const swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(swUrl).catch(err => console.log("SW Error:", err));
-        });
-    }
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); eventoInstalacion = e; document.getElementById('btnInstalar').style.display = 'block'; });
+    function instalarApp() { if(eventoInstalacion) { eventoInstalacion.prompt(); eventoInstalacion = null; } }
 </script>
 </body>
 </html>
